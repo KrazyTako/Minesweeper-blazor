@@ -1,0 +1,125 @@
+﻿@page "/"
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+
+<div class="container">
+    @for (int i = 0; i < tiles.Length; i++)
+    {
+        int row = i;
+        <div class="row flex-nowrap">
+            @for (int j = 0; j < tiles[i].Length; j++)
+            {
+                int col = j;
+                TileProperty tile = tiles[i][j];
+                <div class="col" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:30px; min-width:25px; text-align:center">
+                    @tile.Message
+                </div>
+            }
+        </div>
+    }
+
+    <EditForm Model="gridSize">
+        <InputNumber @bind-Value="gridSize"></InputNumber>
+        <button @onclick="reset" class="btn-outline-primary">Reset</button>
+    </EditForm>
+</div>
+
+@code {
+    private int gridSize = 9;
+    private TileProperty[][] tiles;
+    private bool gameOver = false;
+    private Random generator = new Random();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        reset();
+    }
+
+    private void reset()
+    {
+        gameOver = false;
+        tiles = new TileProperty[gridSize][];
+        for (int i = 0; i < tiles.Length; i++)
+        {
+            tiles[i] = new TileProperty[gridSize];
+            for (int j = 0; j < tiles[i].Length; j++)
+            {
+                tiles[i][j] = new TileProperty();
+                tiles[i][j].IsBomb = MaybeGenerateBomb();
+                tiles[i][j].Row = i;
+                tiles[i][j].Col = j;
+            }
+        }
+    }
+
+    private bool MaybeGenerateBomb() => generator.NextDouble() > 0.7 ? true : false;
+
+    private void OnClick(MouseEventArgs e, TileProperty cell)
+    {
+        if (gameOver)
+        {
+            return;
+        }
+
+        if (e.Button == 2)
+        {
+            if(cell.Message == "?")
+            {
+                cell.Message = "";
+                return;
+            }
+            cell.Message = "?";
+        }
+        else
+        {
+            if(cell.Message == "?")
+            {
+                return;
+            }
+            CountNeighboringBombs(cell);
+        }
+
+    }
+
+    private void CountNeighboringBombs(TileProperty cell)
+    {
+        if (cell.IsBomb)
+        {
+            gameOver = true;
+            cell.Message = "X";
+            return;
+        }
+
+        int total = 0;
+
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                try
+                {
+                    var neighbor = tiles[cell.Row + i][cell.Col + j];
+                    if (neighbor.IsBomb)
+                    {
+                        total++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // TODO: actually do bound checks
+                }
+            }
+        }
+
+        if(total == 0)
+        {
+
+        }
+
+        cell.Message = total.ToString();
+    }
+}

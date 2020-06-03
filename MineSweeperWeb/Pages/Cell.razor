@@ -1,0 +1,54 @@
+﻿<div class="col" @onclick="showBomb" style="background-color:@backgroundColor; border:solid 1px; min-height:30px; min-width:25px; text-align:center">
+    @Message
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Cell> OnRevealCallback { get; set; }
+    [Parameter]
+    public bool IsBomb { get; set; }
+    [Parameter]
+    public int Row { get; set; }
+    [Parameter]
+    public int Col { get; set; }
+
+    public int surroundingBombs;
+    private bool isRevealed = false;
+    private string backgroundColor = "lightgrey";
+    private string Message
+    {
+        get
+        {
+            if(!isRevealed)
+            {
+                return "";
+            }
+            if(isRevealed && IsBomb)
+            {
+                return "X";
+            }
+            return surroundingBombs.ToString();
+        }
+    }
+
+    private async Task showBomb()
+    {
+        if(isRevealed)
+        {
+            return;
+        }
+        isRevealed = true;
+        backgroundColor = "lightslategrey";
+        await OnRevealCallback.InvokeAsync(this);
+    }
+
+    public void SetCount(int count)
+    {
+        surroundingBombs = count;
+    }
+
+    public void SetIsBomb(bool isBomb)
+    {
+        IsBomb = isBomb;
+    }
+}
