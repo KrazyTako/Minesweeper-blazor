@@ -22,13 +22,16 @@ Welcome to your new app.
     }
 
     <EditForm Model="gridSize">
-        <InputNumber @bind-Value="gridSize"></InputNumber>
+        <InputNumber @bind-Value="gridSize" min="5" max="20"></InputNumber>
+        <InputNumber @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
         <button @onclick="reset" class="btn-outline-primary">Reset</button>
     </EditForm>
 </div>
 
 @code {
-    private int gridSize = 9;
+    private int gridSize = 8;
+    private int totalMines = 10;
+
     private TileProperty[][] tiles;
     private bool gameOver = false;
     private Random generator = new Random();
@@ -49,77 +52,111 @@ Welcome to your new app.
             for (int j = 0; j < tiles[i].Length; j++)
             {
                 tiles[i][j] = new TileProperty();
-                tiles[i][j].IsBomb = MaybeGenerateBomb();
                 tiles[i][j].Row = i;
                 tiles[i][j].Col = j;
             }
         }
+
+        int count = 0;
+        while (count < totalMines)
+        {
+            int randomRow = generator.Next(0, gridSize);
+            int randomCol = generator.Next(0, gridSize);
+            TileProperty tile = tiles[randomRow][randomCol];
+
+            if (!tile.IsBomb)
+            {
+                tile.IsBomb = true;
+                count++;
+            }
+        }
+
+        for (int i = 0; i < tiles.Length; i++)
+        {
+            for (int j = 0; j < tiles[i].Length; j++)
+            {
+                var tile = tiles[i][j];
+                tile.SurroundingCount = CountNeighboringBombs(tile);
+            }
+        }
     }
 
-    private bool MaybeGenerateBomb() => generator.NextDouble() > 0.7 ? true : false;
-
-    private void OnClick(MouseEventArgs e, TileProperty cell)
+    private void OnClick(MouseEventArgs e, TileProperty tile)
     {
-        if (gameOver)
+        if (gameOver || tile.IsRevealed)
         {
             return;
         }
 
         if (e.Button == 2)
         {
-            if(cell.Message == "?")
-            {
-                cell.Message = "";
-                return;
-            }
-            cell.Message = "?";
+            tile.IsFlagged = !tile.IsFlagged;
         }
         else
         {
-            if(cell.Message == "?")
+            if (tile.IsFlagged)
             {
                 return;
             }
-            CountNeighboringBombs(cell);
+            tile.IsRevealed = true;
+            if (tile.IsBomb)
+            {
+                gameOver = true;
+                return;
+            }
+            if (tile.SurroundingCount == 0)
+            {
+                RevealAllSurrounding(tile);
+            }
         }
-
     }
 
-    private void CountNeighboringBombs(TileProperty cell)
+    private int CountNeighboringBombs(TileProperty tile)
     {
-        if (cell.IsBomb)
-        {
-            gameOver = true;
-            cell.Message = "X";
-            return;
-        }
-
         int total = 0;
 
-        for (int i = -1; i <= 1; i++)
+        for (int xoff = -1; xoff <= 1; xoff++)
         {
-            for (int j = -1; j <= 1; j++)
+            for (int yoff = -1; yoff <= 1; yoff++)
             {
-                try
+                var i = tile.Row + xoff;
+                var j = tile.Col + yoff;
+                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
                 {
-                    var neighbor = tiles[cell.Row + i][cell.Col + j];
+                    var neighbor = tiles[i][j];
                     if (neighbor.IsBomb)
                     {
                         total++;
                     }
                 }
-                catch (Exception ex)
-                {
-                    // TODO: actually do bound checks
-                }
             }
         }
 
-        if(total == 0)
+        return total;
+    }
+
+    private void RevealAllSurrounding(TileProperty tile)
+    {
+        for (int xoff = -1; xoff <= 1; xoff++)
         {
-
+            for (int yoff = -1; yoff <= 1; yoff++)
+            {
+                var i = tile.Row + xoff;
+                var j = tile.Col + yoff;
+                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
+                {
+                    var neighbor = tiles[i][j];
+                    if(neighbor.IsRevealed)
+                    {
+                        continue;
+                    }
+                    neighbor.IsRevealed = true;
+                    if (neighbor.SurroundingCount == 0)
+                    {
+                        RevealAllSurrounding(neighbor);
+                    }
+                }
+            }
         }
-
-        cell.Message = total.ToString();
     }
 }
