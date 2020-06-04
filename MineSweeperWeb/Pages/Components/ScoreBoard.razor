@@ -1,0 +1,34 @@
+﻿<h3>ScoreBoard</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Player</th>
+            <th scope="col">Time</th>
+            <th scope="col">Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in scores)
+        {
+            <tr>
+                @*<th scope="row">1</th>*@
+                <td>x</td>
+                <td>@item.name</td>
+                <td>@item.points</td>
+                <td>@item.message</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    List<(string name, int points, string message)> scores = new List<(string, int, string)>() 
+    {
+        ("David", 512, "Hello World!"),
+        ("Joe", 1000, "HA! You all suck!"),
+        ("Someone", 5641, "Suck my pianist!")
+    };
+
+}

@@ -17,7 +17,7 @@ namespace MineSweeperWeb
             {
                 if (!IsRevealed)
                 {
-                    return "lightslategrey";
+                    return "#a1a5a8";
                 }
                 return "lightgrey";
             }

@@ -1,20 +1,21 @@
 ﻿@page "/"
 
-<h1>@message</h1>
 
-Remaining mines: @remainingMines
-Elapsed time: @elapsedTime
+<div class="container">
+    <h1>@message</h1>
 
-<div class="container" oncontextmenu="return false">
+    Remaining mines: @remainingMines
+    Elapsed time: @elapsedTime
+
     @for (int i = 0; i < tiles.Length; i++)
     {
         int row = i;
-        <div class="row flex-nowrap">
+        <div class="row flex-nowrap" oncontextmenu="return false">
             @for (int j = 0; j < tiles[i].Length; j++)
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:30px; min-width:25px; text-align:center">
+                <div class="col" @ontouchstart="TouchStart" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:30px; min-width:25px; text-align:center">
                     @tile.Message
                 </div>
             }
@@ -26,6 +27,7 @@ Elapsed time: @elapsedTime
         <InputNumber @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
         <button @onclick="Reset" class="btn-outline-primary">Reset</button>
     </EditForm>
+    <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
 </div>
 
 @code {
@@ -38,11 +40,12 @@ Elapsed time: @elapsedTime
     private int revealedSuccess;
     private int revealedToWin;
     private string message;
+    private bool lastEventWasTouch;
 
     private TileProperty[][] tiles;
     private Random generator = new Random();
     private System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-    System.Threading.Timer timer;
+    private System.Diagnostics.Stopwatch longPressWatch = new System.Diagnostics.Stopwatch();
 
     protected override void OnInitialized()
     {
@@ -111,60 +114,106 @@ Elapsed time: @elapsedTime
         }
     }
 
+    private void TouchStart(TouchEventArgs e)
+    {
+        Console.WriteLine("Touch Started");
+        longPressWatch.Restart();
+        lastEventWasTouch = true;
+    }
+
+    private void TouchEnd(TouchEventArgs e, TileProperty tile)
+    {
+        longPressWatch.Stop();
+        Console.WriteLine("Touch hold lasted: {0}", longPressWatch.ElapsedMilliseconds);
+        if (gameOver || tile.IsRevealed)
+        {
+            return;
+        }
+        if (firstTouch)
+        {
+            firstTouch = false;
+            stopwatch.Restart();
+        }
+        if (longPressWatch.ElapsedMilliseconds > 200)
+        {
+            Console.WriteLine("Long touch");
+            HandleFlagClick(tile);
+        }
+        else
+        {
+            HandleRegularClick(tile);
+        }
+    }
+
     private void OnClick(MouseEventArgs e, TileProperty tile)
     {
-        if(firstTouch)
+        if (gameOver || tile.IsRevealed || lastEventWasTouch)
+        {
+            lastEventWasTouch = false;
+            return;
+        }
+
+        Console.WriteLine("Normal click");
+
+        if (firstTouch)
         {
             firstTouch = false;
             stopwatch.Restart();
         }
 
-        if (gameOver || tile.IsRevealed)
-        {
-            return;
-        }
-
         if (e.Button == 2)
         {
-            if(tile.IsFlagged)
-            {
-                tile.IsFlagged = false;
-                remainingMines++;
-            }
-            else
-            {
-                tile.IsFlagged = true;
-                remainingMines--;
-            }
+            HandleFlagClick(tile);
         }
         else
         {
-            if (tile.IsFlagged)
-            {
-                return;
-            }
-            tile.IsRevealed = true;
-            if (tile.IsBomb)
-            {
-                gameOver = true;
-                stopwatch.Stop();
-                RevealAllBombs();
-                message = "You lost :(";
-                return;
-            }
+            HandleRegularClick(tile);
+        }
+    }
 
-            if (tile.SurroundingCount == 0)
-            {
-                RevealAllSurrounding(tile);
-            }
+    // Long touch-screen press and right click
+    private void HandleFlagClick(TileProperty tile)
+    {
+        if (tile.IsFlagged)
+        {
+            tile.IsFlagged = false;
+            remainingMines++;
+        }
+        else
+        {
+            tile.IsFlagged = true;
+            remainingMines--;
+        }
+    }
 
-            revealedSuccess++;
-            if (revealedSuccess == revealedToWin)
-            {
-                stopwatch.Stop();
-                message = "Victory!";
-                gameOver = true;
-            }
+    // Regular touch and left click
+    private void HandleRegularClick(TileProperty tile)
+    {
+        if (tile.IsFlagged)
+        {
+            return;
+        }
+        tile.IsRevealed = true;
+        if (tile.IsBomb)
+        {
+            gameOver = true;
+            stopwatch.Stop();
+            RevealAllBombs();
+            message = "You lost :(";
+            return;
+        }
+
+        if (tile.SurroundingCount == 0)
+        {
+            RevealAllSurrounding(tile);
+        }
+
+        revealedSuccess++;
+        if (revealedSuccess == revealedToWin)
+        {
+            stopwatch.Stop();
+            message = "Victory!";
+            gameOver = true;
         }
     }
 
