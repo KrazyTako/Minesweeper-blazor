@@ -11,7 +11,17 @@ namespace MineSweeperWeb
         public bool IsBomb { get; set; }
         public bool IsRevealed { get; set; }
         public bool IsFlagged { get; set; }
-        public string BackgroundColor { get; set; } = "lightgrey";
+        public string BackgroundColor
+        {
+            get
+            {
+                if (!IsRevealed)
+                {
+                    return "lightslategrey";
+                }
+                return "lightgrey";
+            }
+        }
         public string Message
         {
             get
@@ -30,7 +40,7 @@ namespace MineSweeperWeb
                 }
                 else
                 {
-                    return SurroundingCount.ToString();
+                    return SurroundingCount == 0 ? "" : SurroundingCount.ToString();
                 }
             }
         }

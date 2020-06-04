@@ -1,11 +1,11 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<h1>@message</h1>
 
-Welcome to your new app.
+Remaining mines: @remainingMines
+Elapsed time: @elapsedTime
 
-
-<div class="container">
+<div class="container" oncontextmenu="return false">
     @for (int i = 0; i < tiles.Length; i++)
     {
         int row = i;
@@ -24,27 +24,44 @@ Welcome to your new app.
     <EditForm Model="gridSize">
         <InputNumber @bind-Value="gridSize" min="5" max="20"></InputNumber>
         <InputNumber @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
-        <button @onclick="reset" class="btn-outline-primary">Reset</button>
+        <button @onclick="Reset" class="btn-outline-primary">Reset</button>
     </EditForm>
 </div>
 
 @code {
     private int gridSize = 8;
     private int totalMines = 10;
+    private int remainingMines;
+    private bool gameOver = false;
+    private bool firstTouch = true;
+    private string elapsedTime;
+    private int revealedSuccess;
+    private int revealedToWin;
+    private string message;
 
     private TileProperty[][] tiles;
-    private bool gameOver = false;
     private Random generator = new Random();
+    private System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+    System.Threading.Timer timer;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        reset();
+        Reset();
+        StartTimer();
     }
 
-    private void reset()
+    private void Reset()
     {
         gameOver = false;
+        firstTouch = true;
+        stopwatch.Stop();
+        remainingMines = totalMines;
+        elapsedTime = "0 ms";
+        revealedSuccess = 0;
+        revealedToWin = (gridSize * gridSize) - totalMines;
+        message = "You got this!";
+
         tiles = new TileProperty[gridSize][];
         for (int i = 0; i < tiles.Length; i++)
         {
@@ -81,8 +98,27 @@ Welcome to your new app.
         }
     }
 
+    private async Task StartTimer()
+    {
+        while (true)
+        {
+            await Task.Delay(1000);
+            if (stopwatch.IsRunning)
+            {
+                elapsedTime = stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                StateHasChanged();
+            }
+        }
+    }
+
     private void OnClick(MouseEventArgs e, TileProperty tile)
     {
+        if(firstTouch)
+        {
+            firstTouch = false;
+            stopwatch.Restart();
+        }
+
         if (gameOver || tile.IsRevealed)
         {
             return;
@@ -90,7 +126,16 @@ Welcome to your new app.
 
         if (e.Button == 2)
         {
-            tile.IsFlagged = !tile.IsFlagged;
+            if(tile.IsFlagged)
+            {
+                tile.IsFlagged = false;
+                remainingMines++;
+            }
+            else
+            {
+                tile.IsFlagged = true;
+                remainingMines--;
+            }
         }
         else
         {
@@ -102,11 +147,37 @@ Welcome to your new app.
             if (tile.IsBomb)
             {
                 gameOver = true;
+                stopwatch.Stop();
+                RevealAllBombs();
+                message = "You lost :(";
                 return;
             }
+
             if (tile.SurroundingCount == 0)
             {
                 RevealAllSurrounding(tile);
+            }
+
+            revealedSuccess++;
+            if (revealedSuccess == revealedToWin)
+            {
+                stopwatch.Stop();
+                message = "Victory!";
+                gameOver = true;
+            }
+        }
+    }
+
+    private void RevealAllBombs()
+    {
+        for (int i = 0; i < tiles.Length; i++)
+        {
+            for (int j = 0; j < tiles[i].Length; j++)
+            {
+                if(tiles[i][j].IsBomb)
+                {
+                    tiles[i][j].IsRevealed = true;
+                }
             }
         }
     }
@@ -151,6 +222,7 @@ Welcome to your new app.
                         continue;
                     }
                     neighbor.IsRevealed = true;
+                    revealedSuccess++;
                     if (neighbor.SurroundingCount == 0)
                     {
                         RevealAllSurrounding(neighbor);
