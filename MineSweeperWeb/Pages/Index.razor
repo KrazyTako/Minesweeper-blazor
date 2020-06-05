@@ -69,7 +69,7 @@
         firstTouch = true;
         stopwatch.Stop();
         remainingMines = totalMines;
-        elapsedTime = "0 ms";
+        elapsedTime = "0";
         revealedSuccess = 0;
         revealedToWin = (gridSize * gridSize) - totalMines;
         message = "You got this!";
@@ -117,7 +117,7 @@
             await Task.Delay(1000);
             if (stopwatch.IsRunning)
             {
-                elapsedTime = stopwatch.ElapsedMilliseconds.ToString() + " ms";
+                elapsedTime = Math.Round(stopwatch.ElapsedMilliseconds / 1000.0).ToString() ;
                 StateHasChanged();
             }
         }
