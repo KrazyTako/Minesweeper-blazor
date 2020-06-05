@@ -32,7 +32,7 @@
             <label class="mr-2" for="mineCount">Mine Count</label>
             <InputNumber id="mineCount" class="form-control" @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
         </div>
-        <button type="button" @onclick="Reset" class="btn btn-primary">Reset</button>
+        <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
      <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
 </div>
