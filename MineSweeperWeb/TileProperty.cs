@@ -22,25 +22,6 @@ namespace MineSweeperWeb
                 return "lightgrey";
             }
         }
-        public string Message
-        {
-            get
-            {
-                if(IsFlagged)
-                {
-                    return "!";
-                }
-                if(!IsRevealed)
-                {
-                    return "";
-                }
-                if(IsBomb)
-                {
-                    return "X";
-                }
-                return SurroundingCount == 0 ? "" : SurroundingCount.ToString();
-            }
-        }
 
         public string cssIcon
         {
