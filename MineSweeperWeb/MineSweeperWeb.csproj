@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CurrieTechnologies.Razor.Vibration" Version="0.3.0" />
+  </ItemGroup>
+
 </Project>

@@ -1,33 +1,40 @@
 ﻿@page "/"
-
+@inject VibrationService vibrationService
 
 <div class="container">
     <h1>@message</h1>
 
-    Remaining mines: @remainingMines
-    Elapsed time: @elapsedTime
+    <p>Remaining mines: @remainingMines</p>
+    <p>Elapsed time: @elapsedTime</p>
 
     @for (int i = 0; i < tiles.Length; i++)
     {
         int row = i;
-        <div class="row flex-nowrap" oncontextmenu="return false">
+        <div class="row flex-nowrap" oncontextmenu="return false" style="-moz-user-select: none; -webkit-user-select: none; -ms-user-select: none; user-select: none; -o-user-select: none;">
             @for (int j = 0; j < tiles[i].Length; j++)
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col" @ontouchstart="TouchStart" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:30px; min-width:25px; text-align:center">
-                    @tile.Message
+                <div class="col" @ontouchstart="TouchStart" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:35px; min-width:25px; text-align:center">
+                    <span class="@tile.cssIcon"></span>
+                    @(tile.IsRevealed && string.IsNullOrEmpty(tile.cssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
                 </div>
             }
         </div>
     }
 
-    <EditForm Model="gridSize">
-        <InputNumber @bind-Value="gridSize" min="5" max="20"></InputNumber>
-        <InputNumber @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
-        <button @onclick="Reset" class="btn-outline-primary">Reset</button>
+    <EditForm Model="gridSize" class="form-inline my-3">
+        <div class="form-group mr-2">
+            <label class="mr-2" for="gridSize">Grid size</label>
+            <InputNumber id="gridSize" class="form-control" @bind-Value="gridSize" min="5" max="20"></InputNumber>
+        </div>
+        <div class="form-group mr-2">
+            <label class="mr-2" for="mineCount">Mine Count</label>
+            <InputNumber id="mineCount" class="form-control" @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
+        </div>
+        <button type="button" @onclick="Reset" class="btn btn-primary">Reset</button>
     </EditForm>
-    <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
+     <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
 </div>
 
 @code {
@@ -46,11 +53,13 @@
     private Random generator = new Random();
     private System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
     private System.Diagnostics.Stopwatch longPressWatch = new System.Diagnostics.Stopwatch();
+    private System.Timers.Timer timer = new System.Timers.Timer(200);
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         Reset();
+        timer.Elapsed += doVibration;
         StartTimer();
     }
 
@@ -114,15 +123,24 @@
         }
     }
 
+
     private void TouchStart(TouchEventArgs e)
     {
         Console.WriteLine("Touch Started");
         longPressWatch.Restart();
         lastEventWasTouch = true;
+        timer.Start();
     }
 
-    private void TouchEnd(TouchEventArgs e, TileProperty tile)
+    private void doVibration(Object source, System.Timers.ElapsedEventArgs e)
     {
+        vibrationService.VibrateAsync(100);
+        timer.Stop();
+    }
+
+    private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
+    {
+        timer.Stop();
         longPressWatch.Stop();
         Console.WriteLine("Touch hold lasted: {0}", longPressWatch.ElapsedMilliseconds);
         if (gameOver || tile.IsRevealed)
@@ -223,7 +241,7 @@
         {
             for (int j = 0; j < tiles[i].Length; j++)
             {
-                if(tiles[i][j].IsBomb)
+                if (tiles[i][j].IsBomb)
                 {
                     tiles[i][j].IsRevealed = true;
                 }
@@ -266,7 +284,7 @@
                 if (i > -1 && i < gridSize && j > -1 && j < gridSize)
                 {
                     var neighbor = tiles[i][j];
-                    if(neighbor.IsRevealed)
+                    if (neighbor.IsRevealed)
                     {
                         continue;
                     }

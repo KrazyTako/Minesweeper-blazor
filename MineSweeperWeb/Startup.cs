@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CurrieTechnologies.Razor.Vibration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -28,7 +29,7 @@ namespace MineSweeperWeb
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddVibration();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

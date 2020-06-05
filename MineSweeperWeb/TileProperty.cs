@@ -28,7 +28,7 @@ namespace MineSweeperWeb
             {
                 if(IsFlagged)
                 {
-                    return "?";
+                    return "!";
                 }
                 if(!IsRevealed)
                 {
@@ -38,10 +38,27 @@ namespace MineSweeperWeb
                 {
                     return "X";
                 }
-                else
+                return SurroundingCount == 0 ? "" : SurroundingCount.ToString();
+            }
+        }
+
+        public string cssIcon
+        {
+            get
+            {
+                if (IsFlagged)
                 {
-                    return SurroundingCount == 0 ? "" : SurroundingCount.ToString();
+                    return "oi oi-flag";
                 }
+                if (!IsRevealed)
+                {
+                    return "";
+                }
+                if (IsBomb)
+                {
+                    return "oi oi-x";
+                }
+                return "";
             }
         }
         public int SurroundingCount { get; set; }
