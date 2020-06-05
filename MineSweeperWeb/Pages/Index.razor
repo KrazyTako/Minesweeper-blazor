@@ -10,14 +10,15 @@
     @for (int i = 0; i < tiles.Length; i++)
     {
         int row = i;
-        <div class="row flex-nowrap" oncontextmenu="return false" style="-moz-user-select: none; -webkit-user-select: none; -ms-user-select: none; user-select: none; -o-user-select: none;">
+        <div class="row no-gutters flex-nowrap text-center" oncontextmenu="return false" style="-moz-user-select: none; -webkit-user-select: none; -ms-user-select: none; user-select: none; -o-user-select: none;">
             @for (int j = 0; j < tiles[i].Length; j++)
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col" @ontouchstart="TouchStart" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:35px; min-width:25px; text-align:center">
-                    <span class="@tile.cssIcon"></span>
-                    @(tile.IsRevealed && string.IsNullOrEmpty(tile.cssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
+                <div class="col" @ontouchstart="TouchStart" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:35px; min-width:25px;">
+                    <span class="@tile.cssIcon">
+                        @(tile.IsRevealed && string.IsNullOrEmpty(tile.cssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
+                    </span>
                 </div>
             }
         </div>
