@@ -19,6 +19,6 @@ jobs:
                     cd MineSweeperWeb
                     git pull
                     git status
-                    systemcl stop kestrel-helloapp.service
+                    systemctl stop kestrel-helloapp.service
                     dotnet publish -o ../publish
-                    systemcl start kestrel-helloapp.service
+                    systemctl start kestrel-helloapp.service
