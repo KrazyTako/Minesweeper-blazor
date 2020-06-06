@@ -13,6 +13,7 @@ jobs:
             with:
                 host: ${{secrets.SERVER_URL}}
                 key: ${{secrets.SSH_PRIVATE_KEY}}
+                username: root
                 port: 22
                 script: |
                     cd MineSweeperWeb
