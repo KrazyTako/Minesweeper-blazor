@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MineSweeperWeb.Data;
+using MineSweeperData;
+using MineSweeperData.Services;
 
 namespace MineSweeperWeb
 {
@@ -30,6 +32,11 @@ namespace MineSweeperWeb
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddVibration();
+            services.AddDbContext<MinesweeperDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+            services.AddTransient<ScoresService, ScoresService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

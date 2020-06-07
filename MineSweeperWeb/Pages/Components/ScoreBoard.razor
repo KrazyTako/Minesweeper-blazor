@@ -1,4 +1,7 @@
-﻿<h3>ScoreBoard</h3>
+﻿@using MineSweeperData.Models;
+@inject MineSweeperData.Services.ScoresService scoresService;
+
+<h3>ScoreBoard</h3>
 
 <table class="table">
     <thead>
@@ -15,20 +18,21 @@
             <tr>
                 @*<th scope="row">1</th>*@
                 <td>x</td>
-                <td>@item.name</td>
-                <td>@item.points</td>
-                <td>@item.message</td>
+                <td>@item.Name</td>
+                <td>@item.Points</td>
+                <td>@item.Message</td>
             </tr>
         }
     </tbody>
 </table>
 
 @code {
-    List<(string name, int points, string message)> scores = new List<(string, int, string)>() 
+    IEnumerable<Score> scores = new List<Score>();
+
+    protected override async Task OnInitializedAsync()
     {
-        ("David", 512, "Hello World!"),
-        ("Joe", 1000, "HA! You all suck!"),
-        ("Someone", 5641, "Suck my pianist!")
-    };
+        scores = await scoresService.GetAllScores();
+        await base.OnInitializedAsync();
+    }
 
 }

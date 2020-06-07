@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject VibrationService vibrationService
+@inject MineSweeperData.Services.ScoresService scoreService;
 
 <div class="container">
     <h1>@message</h1>
@@ -37,7 +38,9 @@
         </div>
         <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
-     <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
+    <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
+    <button type="button" @onclick="CreateRandom" class="btn btn-outline-primary">Create random score</button>
+
 </div>
 
 @code {
@@ -64,6 +67,16 @@
         Reset();
         timer.Elapsed += doVibration;
         StartTimer();
+    }
+
+    public async Task CreateRandom()
+    {
+        Score score = new Score();
+        score.Points = generator.Next(0, 1000);
+        score.Time = TimeSpan.FromSeconds(generator.Next(20, 500));
+        score.Date = DateTime.Today.AddDays(generator.Next(0, 365) * -1);
+        score.Name = "idk";
+        await scoreService.CreateNewScore(score);
     }
 
     private void Reset()
