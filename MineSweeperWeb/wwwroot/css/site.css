@@ -18,3 +18,11 @@
     right: 0.75rem;
     top: 0.5rem;
 }
+
+.disable-text-highlight {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -o-user-select: none;
+}

@@ -7,7 +7,7 @@
     <p>Remaining mines: @remainingMines</p>
     <p>Elapsed time: @elapsedTime</p>
 
-    <div oncontextmenu="return false" style="-moz-user-select: none; -webkit-user-select: none; -ms-user-select: none; user-select: none; -o-user-select: none;">
+    <div oncontextmenu="return false" class="disable-text-highlight">
         @for (int i = 0; i < tiles.Length; i++)
         {
             int row = i;
@@ -129,7 +129,6 @@
 
     private void TouchStart(TouchEventArgs e)
     {
-        Console.WriteLine("Touch Started");
         longPressWatch.Restart();
         lastEventWasTouch = true;
         timer.Start();
@@ -141,11 +140,10 @@
         timer.Stop();
     }
 
-    private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
+    private void TouchEnd(TouchEventArgs e, TileProperty tile)
     {
         timer.Stop();
         longPressWatch.Stop();
-        Console.WriteLine("Touch hold lasted: {0}", longPressWatch.ElapsedMilliseconds);
         if (gameOver || tile.IsRevealed)
         {
             return;
@@ -157,7 +155,6 @@
         }
         if (longPressWatch.ElapsedMilliseconds > 200)
         {
-            Console.WriteLine("Long touch");
             HandleFlagClick(tile);
         }
         else
@@ -173,8 +170,6 @@
             lastEventWasTouch = false;
             return;
         }
-
-        Console.WriteLine("Normal click");
 
         if (firstTouch)
         {
