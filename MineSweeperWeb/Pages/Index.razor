@@ -38,8 +38,8 @@
         </div>
         <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
-    <MineSweeperWeb.Pages.Components.ScoreBoard></MineSweeperWeb.Pages.Components.ScoreBoard>
-    <button type="button" @onclick="CreateRandom" class="btn btn-outline-primary">Create random score</button>
+    <MineSweeperWeb.Pages.Components.ScoreBoard @ref="scoreBoard"></MineSweeperWeb.Pages.Components.ScoreBoard>
+    <MineSweeperWeb.Shared.Modals.NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></MineSweeperWeb.Shared.Modals.NewScoreModal>
 
 </div>
 
@@ -54,12 +54,15 @@
     private int revealedToWin;
     private string message;
     private bool lastEventWasTouch;
+    private int points = 0;
 
     private TileProperty[][] tiles;
     private Random generator = new Random();
     private System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
     private System.Diagnostics.Stopwatch longPressWatch = new System.Diagnostics.Stopwatch();
     private System.Timers.Timer timer = new System.Timers.Timer(200);
+    private MineSweeperWeb.Shared.Modals.NewScoreModal newScoreModal;
+    private MineSweeperWeb.Pages.Components.ScoreBoard scoreBoard;
 
     protected override void OnInitialized()
     {
@@ -69,14 +72,9 @@
         StartTimer();
     }
 
-    public async Task CreateRandom()
+    private void OnScoreCreated(Score newScore)
     {
-        Score score = new Score();
-        score.Points = generator.Next(0, 1000);
-        score.Time = TimeSpan.FromSeconds(generator.Next(20, 500));
-        score.Date = DateTime.Today.AddDays(generator.Next(0, 90) * -1);
-        score.Name = "idk";
-        await scoreService.CreateNewScore(score);
+        scoreBoard.AddScore(newScore);
     }
 
     private void Reset()
@@ -153,7 +151,7 @@
         timer.Stop();
     }
 
-    private void TouchEnd(TouchEventArgs e, TileProperty tile)
+    private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
     {
         timer.Stop();
         longPressWatch.Stop();
@@ -172,7 +170,7 @@
         }
         else
         {
-            HandleRegularClick(tile);
+            await HandleRegularClick(tile);
         }
     }
 
@@ -216,7 +214,7 @@
     }
 
     // Regular touch and left click
-    private void HandleRegularClick(TileProperty tile)
+    private async Task HandleRegularClick(TileProperty tile)
     {
         if (tile.IsFlagged)
         {
@@ -243,6 +241,7 @@
             stopwatch.Stop();
             message = "Victory!";
             gameOver = true;
+            await newScoreModal.Show(stopwatch.ElapsedMilliseconds, points);
         }
     }
 

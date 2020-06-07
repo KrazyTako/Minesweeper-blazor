@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MineSweeperWeb", "MineSweeperWeb\MineSweeperWeb.csproj", "{C7A3A4D5-86F6-40C0-A3CF-D8F9E6C58B11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MineSweeperData", "MineSweeperData\MineSweeperData.csproj", "{D8186155-A3CC-4035-ABE1-CB368D6175DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MineSweeperData", "MineSweeperData\MineSweeperData.csproj", "{D8186155-A3CC-4035-ABE1-CB368D6175DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

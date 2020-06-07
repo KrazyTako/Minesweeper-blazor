@@ -20,11 +20,18 @@ namespace MineSweeperData.Services
             return await dbContext.Scores.ToListAsync();
         }
 
-        public async Task<Score> CreateNewScore(Score score)
+        public async Task<Score> CreateNewScore(string name, string message, int points, long elapsedMilliseconds)
         {
-            dbContext.Scores.Add(score);
+            Score newScore = new Score();
+            newScore.Date = DateTime.Now;
+            newScore.Name = name;
+            newScore.Message = message;
+            newScore.Points = points;
+            newScore.Time = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+
+            dbContext.Scores.Add(newScore);
             await dbContext.SaveChangesAsync();
-            return score;
+            return newScore;
         }
 
         public async Task<IEnumerable<Score>> GetScoresInDateRange(DateTime start, DateTime end)
