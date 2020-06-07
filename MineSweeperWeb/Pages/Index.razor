@@ -74,7 +74,7 @@
         Score score = new Score();
         score.Points = generator.Next(0, 1000);
         score.Time = TimeSpan.FromSeconds(generator.Next(20, 500));
-        score.Date = DateTime.Today.AddDays(generator.Next(0, 365) * -1);
+        score.Date = DateTime.Today.AddDays(generator.Next(0, 90) * -1);
         score.Name = "idk";
         await scoreService.CreateNewScore(score);
     }
@@ -133,7 +133,7 @@
             await Task.Delay(1000);
             if (stopwatch.IsRunning)
             {
-                elapsedTime = Math.Round(stopwatch.ElapsedMilliseconds / 1000.0).ToString() ;
+                elapsedTime = Math.Round(stopwatch.ElapsedMilliseconds / 1000.0).ToString();
                 StateHasChanged();
             }
         }

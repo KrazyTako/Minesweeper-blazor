@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MineSweeperData.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MineSweeperData.Services
@@ -23,6 +25,13 @@ namespace MineSweeperData.Services
             dbContext.Scores.Add(score);
             await dbContext.SaveChangesAsync();
             return score;
+        }
+
+        public async Task<IEnumerable<Score>> GetScoresInDateRange(DateTime start, DateTime end)
+        {
+            return await dbContext.Scores
+                            .Where(score => score.Date > start && score.Date < end)
+                            .ToListAsync();
         }
     }
 }

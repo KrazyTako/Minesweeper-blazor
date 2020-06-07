@@ -1,38 +1,66 @@
 ﻿@using MineSweeperData.Models;
 @inject MineSweeperData.Services.ScoresService scoresService;
 
-<h3>ScoreBoard</h3>
+<h3>Leader Boards</h3>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Player</th>
-            <th scope="col">Time</th>
-            <th scope="col">Message</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in scores)
-        {
-            <tr>
-                @*<th scope="row">1</th>*@
-                <td>x</td>
-                <td>@item.Name</td>
-                <td>@item.Points</td>
-                <td>@item.Message</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<ul class="nav nav-tabs" id="myTab">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-7), DateTime.Now)" href="#last7">Last 7 Days</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-30), DateTime.Now)" href="#last30">Last 30 Days</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-60), DateTime.Now)" href="#last60">Last 60 Days</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-90), DateTime.Now)" href="#last90">Last 90 Days</a>
+    </li>
+</ul>
+
+<div class="tab-content mt-2">
+    <div class="tab-pane active">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Player</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Points</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in scores)
+                {
+                    <tr>
+                        <td>x</td>
+                        <td>@item.Name</td>
+                        <td>@item.Time.Minutes:@item.Time.Seconds</td>
+                        <td>@item.Points</td>
+                        <td>@item.Date.ToShortDateString()</td>
+                        <td>@item.Message</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @code {
     IEnumerable<Score> scores = new List<Score>();
+    List<bool> tabs = new List<bool>();
 
     protected override async Task OnInitializedAsync()
     {
-        scores = await scoresService.GetAllScores();
+        await UpdateDate(DateTime.Now.AddDays(-7), DateTime.Now);
         await base.OnInitializedAsync();
+    }
+
+    private async Task UpdateDate(DateTime start, DateTime end)
+    {
+        scores = await scoresService.GetScoresInDateRange(start, end);
     }
 
 }
