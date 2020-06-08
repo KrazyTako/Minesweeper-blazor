@@ -148,8 +148,12 @@
 
     private void doVibration(Object source, System.Timers.ElapsedEventArgs e)
     {
-        vibrationService.VibrateAsync(100);
         timer.Stop();
+        if(lastEventWasTouchMove)
+        {
+            return;
+        }
+        vibrationService.VibrateAsync(100);
     }
 
     private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
