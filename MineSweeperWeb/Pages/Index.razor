@@ -241,7 +241,7 @@
             stopwatch.Stop();
             message = "Victory!";
             gameOver = true;
-            await newScoreModal.Show(stopwatch.ElapsedMilliseconds, points);
+            await newScoreModal.Show(stopwatch.ElapsedMilliseconds, gridSize, gridSize, totalMines);
         }
     }
 

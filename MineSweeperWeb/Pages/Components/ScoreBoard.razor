@@ -32,15 +32,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in scores)
+                @for(int i = 0; i < scores.Count; i++)
                 {
+                    int rank = i + 1;
                     <tr>
-                        <td>x</td>
-                        <td>@item.Name</td>
-                        <td>@item.Time.Minutes:@item.Time.Seconds</td>
-                        <td>@item.Points</td>
-                        <td>@item.Date.ToShortDateString()</td>
-                        <td>@item.Message</td>
+                        <td>@rank</td>
+                        <td>@scores[i].Name</td>
+                        <td>@scores[i].Time.Minutes:@scores[i].Time.Seconds</td>
+                        <td>@ComputeScore(scores[i]).ToString()</td>
+                        <td>@scores[i].Date.ToShortDateString()</td>
+                        <td>@scores[i].Message</td>
                     </tr>
                 }
             </tbody>
@@ -59,12 +60,20 @@
 
     private async Task UpdateDate(DateTime start, DateTime end)
     {
-        scores = (await scoresService.GetScoresInDateRange(start, end)).ToList();
+        scores = (await scoresService.GetScoresInDateRange(start, end))
+                    .OrderByDescending(ComputeScore)
+                    .ToList();
     }
 
     public void AddScore(Score score)
     {
         scores.Add(score);
         StateHasChanged();
+    }
+
+    private int ComputeScore(Score score)
+    {
+        int tileCount = score.Width * score.Height;
+        return (int) ((score.MineCount / (double)tileCount) * 100.0 * 1.3 * Math.Sqrt(tileCount) - score.Time.TotalSeconds);
     }
 }

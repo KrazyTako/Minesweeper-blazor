@@ -20,13 +20,15 @@ namespace MineSweeperData.Services
             return await dbContext.Scores.ToListAsync();
         }
 
-        public async Task<Score> CreateNewScore(string name, string message, int points, long elapsedMilliseconds)
+        public async Task<Score> CreateNewScore(string name, string message, int width, int height, int mineCount, long elapsedMilliseconds)
         {
             Score newScore = new Score();
             newScore.Date = DateTime.Now;
             newScore.Name = name;
             newScore.Message = message;
-            newScore.Points = points;
+            newScore.Width = width;
+            newScore.Height = height;
+            newScore.MineCount = mineCount;
             newScore.Time = TimeSpan.FromMilliseconds(elapsedMilliseconds);
 
             dbContext.Scores.Add(newScore);

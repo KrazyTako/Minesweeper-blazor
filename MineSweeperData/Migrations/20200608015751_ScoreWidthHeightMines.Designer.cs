@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MineSweeperData;
 
 namespace MineSweeperData.Migrations
 {
     [DbContext(typeof(MinesweeperDbContext))]
-    partial class MinesweeperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200608015751_ScoreWidthHeightMines")]
+    partial class ScoreWidthHeightMines
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

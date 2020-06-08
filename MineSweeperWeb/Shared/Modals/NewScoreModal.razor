@@ -40,7 +40,9 @@
     private MineSweeperWeb.FormModels.CreateScore createScore = new FormModels.CreateScore();
     private string modalId = "createNewScoreModal";
     private long _time;
-    private int _points;
+    private int _width;
+    private int _height;
+    private int _mineCount;
 
     [Parameter]
     public EventCallback<Score> OnScoreCreatedCallback { get; set; }
@@ -52,17 +54,19 @@
     {
         spinnerCssState = "spinner-border";
         sendBtnDisabled = true;
-        Score newScore = await scoreService.CreateNewScore(createScore.Name, createScore.Message, _points, _time);
+        Score newScore = await scoreService.CreateNewScore(createScore.Name, createScore.Message, _width, _height, _mineCount, _time);
         spinnerCssState = null;
         sendBtnDisabled = false;
         await jsRuntime.InvokeVoidAsync("hideModal", modalId);
         await OnScoreCreatedCallback.InvokeAsync(newScore);
     }
 
-    public async Task Show(long time, int points)
+    public async Task Show(long time, int width, int height, int mineCount)
     {
         _time = time;
-        _points = points;
+        _width = width;
+        _height = height;
+        _mineCount = mineCount;
         await jsRuntime.InvokeVoidAsync("showModal", modalId);
     }
 }
