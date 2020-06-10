@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject VibrationService vibrationService
+@using System.Diagnostics
 @inject MineSweeperData.Services.ScoresService scoreService;
 
 <div class="container">
@@ -8,25 +8,7 @@
     <p>Remaining mines: @remainingMines</p>
     <p>Elapsed time: @elapsedTime</p>
 
-    <div oncontextmenu="return false" class="disable-text-highlight overflow-auto">
-        @for (int i = 0; i < tiles.Length; i++)
-        {
-            int row = i;
-            <div class="row no-gutters flex-nowrap text-center">
-                @for (int j = 0; j < tiles[i].Length; j++)
-                {
-                    int col = j;
-                    TileProperty tile = tiles[i][j];
-                    <div class="col" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:35px; min-width:25px;">
-                        <span class="@tile.cssIcon">
-                            @(tile.IsRevealed && string.IsNullOrEmpty(tile.cssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
-                        </span>
-                    </div>
-                }
-            </div>
-        }
-    </div>
-
+    <Minesweeper OnGameWinCallback="OnGameWin" OnGameLoseCallback="OnGameLose" OnFirstActionCallback="OnFirstAction" OnFlagSetCallback="OnFlagSet" @ref="minesweeper"></Minesweeper>
     <EditForm Model="gridSize" class="form-inline my-3">
         <div class="form-group mr-2">
             <label class="mr-2" for="gridSize">Grid size</label>
@@ -38,94 +20,32 @@
         </div>
         <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
-    <MineSweeperWeb.Pages.Components.ScoreBoard @ref="scoreBoard"></MineSweeperWeb.Pages.Components.ScoreBoard>
-    <MineSweeperWeb.Shared.Modals.NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></MineSweeperWeb.Shared.Modals.NewScoreModal>
-
+    <ScoreBoard @ref="scoreBoard"></ScoreBoard>
+    <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
 </div>
 
 @code {
+    private Minesweeper minesweeper;
+    private ScoreBoard scoreBoard;
+    private NewScoreModal newScoreModal;
+    private Stopwatch stopwatch = new Stopwatch();
+    private string message = "Good luck!";
+    private string elapsedTime = "0";
     private int gridSize = 8;
     private int totalMines = 10;
-    private int remainingMines;
-    private bool gameOver = false;
-    private bool firstTouch = true;
-    private string elapsedTime;
-    private int revealedSuccess;
-    private int revealedToWin;
-    private string message;
-    private bool lastEventWasTouch;
-    private int points = 0;
-    private bool lastEventWasTouchMove;
+    private int remainingMines = 10;
 
-    private TileProperty[][] tiles;
-    private Random generator = new Random();
-    private System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-    private System.Diagnostics.Stopwatch longPressWatch = new System.Diagnostics.Stopwatch();
-    private System.Timers.Timer timer = new System.Timers.Timer(200);
-    private MineSweeperWeb.Shared.Modals.NewScoreModal newScoreModal;
-    private MineSweeperWeb.Pages.Components.ScoreBoard scoreBoard;
-
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         base.OnInitialized();
-        Reset();
-        timer.Elapsed += doVibration;
-        StartTimer();
-    }
-
-    private void OnScoreCreated(Score newScore)
-    {
-        scoreBoard.AddScore(newScore);
-    }
-
-    private void Reset()
-    {
-        gameOver = false;
-        firstTouch = true;
-        stopwatch.Stop();
-        remainingMines = totalMines;
-        elapsedTime = "0";
-        revealedSuccess = 0;
-        revealedToWin = (gridSize * gridSize) - totalMines;
-        message = "You got this!";
-
-        tiles = new TileProperty[gridSize][];
-        for (int i = 0; i < tiles.Length; i++)
+        if (firstRender)
         {
-            tiles[i] = new TileProperty[gridSize];
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                tiles[i][j] = new TileProperty();
-                tiles[i][j].Row = i;
-                tiles[i][j].Col = j;
-            }
-        }
-
-        int count = 0;
-        while (count < totalMines)
-        {
-            int randomRow = generator.Next(0, gridSize);
-            int randomCol = generator.Next(0, gridSize);
-            TileProperty tile = tiles[randomRow][randomCol];
-
-            if (!tile.IsBomb)
-            {
-                tile.IsBomb = true;
-                count++;
-            }
-        }
-
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                var tile = tiles[i][j];
-                tile.SurroundingCount = CountNeighboringBombs(tile);
-            }
+            Reset();
+            await InitializeStopwatch();
         }
     }
 
-    private async Task StartTimer()
+    private async Task InitializeStopwatch()
     {
         while (true)
         {
@@ -138,180 +58,45 @@
         }
     }
 
-
-    private void TouchStart(TouchEventArgs e)
+    private void OnFirstAction()
     {
-        longPressWatch.Restart();
-        lastEventWasTouch = true;
-        timer.Start();
+        stopwatch.Start();
     }
 
-    private void doVibration(Object source, System.Timers.ElapsedEventArgs e)
+    private void Reset()
     {
-        timer.Stop();
-        if(lastEventWasTouchMove)
-        {
-            return;
-        }
-        vibrationService.VibrateAsync(100);
+        stopwatch.Stop();
+        elapsedTime = "0";
+        message = "Good luck!";
+        remainingMines = totalMines;
+        minesweeper.Reset(gridSize, totalMines);
+        StateHasChanged();
     }
 
-    private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
+    private async Task OnGameWin()
     {
-        timer.Stop();
-        longPressWatch.Stop();
-        if (gameOver || tile.IsRevealed || lastEventWasTouchMove)
-        {
-            lastEventWasTouchMove = false;
-            return;
-        }
-        if (firstTouch)
-        {
-            firstTouch = false;
-            stopwatch.Restart();
-        }
-        if (longPressWatch.ElapsedMilliseconds > 200)
-        {
-            HandleFlagClick(tile);
-        }
-        else
-        {
-            await HandleRegularClick(tile);
-        }
+        stopwatch.Stop();
+        message = "You've won!";
+        await newScoreModal.Show(stopwatch.ElapsedMilliseconds, gridSize, gridSize, totalMines);
     }
 
-    private void OnClick(MouseEventArgs e, TileProperty tile)
+    private void OnGameLose()
     {
-        if (gameOver || tile.IsRevealed || lastEventWasTouch)
-        {
-            lastEventWasTouch = false;
-            return;
-        }
-
-        if (firstTouch)
-        {
-            firstTouch = false;
-            stopwatch.Restart();
-        }
-
-        if (e.Button == 2)
-        {
-            HandleFlagClick(tile);
-        }
-        else
-        {
-            HandleRegularClick(tile);
-        }
+        stopwatch.Stop();
+        message = "You've lost :(";
     }
 
-    // Long touch-screen press and right click
-    private void HandleFlagClick(TileProperty tile)
+    private void OnFlagSet(bool active)
     {
-        if (tile.IsFlagged)
+        if (active)
         {
-            tile.IsFlagged = false;
-            remainingMines++;
-        }
-        else
-        {
-            tile.IsFlagged = true;
             remainingMines--;
         }
-    }
-
-    // Regular touch and left click
-    private async Task HandleRegularClick(TileProperty tile)
-    {
-        if (tile.IsFlagged)
+        else
         {
-            return;
-        }
-        tile.IsRevealed = true;
-        if (tile.IsBomb)
-        {
-            gameOver = true;
-            stopwatch.Stop();
-            RevealAllBombs();
-            message = "You lost :(";
-            return;
-        }
-
-        if (tile.SurroundingCount == 0)
-        {
-            RevealAllSurrounding(tile);
-        }
-
-        revealedSuccess++;
-        if (revealedSuccess == revealedToWin)
-        {
-            stopwatch.Stop();
-            message = "Victory!";
-            gameOver = true;
-            await newScoreModal.Show(stopwatch.ElapsedMilliseconds, gridSize, gridSize, totalMines);
+            remainingMines++;
         }
     }
 
-    private void RevealAllBombs()
-    {
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                if (tiles[i][j].IsBomb)
-                {
-                    tiles[i][j].IsRevealed = true;
-                }
-            }
-        }
-    }
-
-    private int CountNeighboringBombs(TileProperty tile)
-    {
-        int total = 0;
-
-        for (int xoff = -1; xoff <= 1; xoff++)
-        {
-            for (int yoff = -1; yoff <= 1; yoff++)
-            {
-                var i = tile.Row + xoff;
-                var j = tile.Col + yoff;
-                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
-                {
-                    var neighbor = tiles[i][j];
-                    if (neighbor.IsBomb)
-                    {
-                        total++;
-                    }
-                }
-            }
-        }
-
-        return total;
-    }
-
-    private void RevealAllSurrounding(TileProperty tile)
-    {
-        for (int xoff = -1; xoff <= 1; xoff++)
-        {
-            for (int yoff = -1; yoff <= 1; yoff++)
-            {
-                var i = tile.Row + xoff;
-                var j = tile.Col + yoff;
-                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
-                {
-                    var neighbor = tiles[i][j];
-                    if (neighbor.IsRevealed)
-                    {
-                        continue;
-                    }
-                    neighbor.IsRevealed = true;
-                    revealedSuccess++;
-                    if (neighbor.SurroundingCount == 0)
-                    {
-                        RevealAllSurrounding(neighbor);
-                    }
-                }
-            }
-        }
-    }
+    private void OnScoreCreated(Score newScore) => scoreBoard.AddScore(newScore);
 }
