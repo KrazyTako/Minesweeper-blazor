@@ -11,9 +11,9 @@
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)" style="background-color:@tile.BackgroundColor; border:solid 1px; min-height:30px; min-width:30px;">
-                    <span class="@tile.cssIcon">
-                        @(tile.IsRevealed && string.IsNullOrEmpty(tile.cssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
+                <div class="col tile @tile.CssClass" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
+                    <span class="@tile.CssIcon">
+                        @(tile.IsRevealed && string.IsNullOrEmpty(tile.CssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
                     </span>
                 </div>
             }

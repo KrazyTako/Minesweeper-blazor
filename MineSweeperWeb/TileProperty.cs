@@ -11,19 +11,19 @@ namespace MineSweeperWeb
         public bool IsBomb { get; set; }
         public bool IsRevealed { get; set; }
         public bool IsFlagged { get; set; }
-        public string BackgroundColor
+        public string CssClass
         {
             get
             {
                 if (!IsRevealed)
                 {
-                    return "#a1a5a8";
+                    return "tile-hidden";
                 }
-                return "lightgrey";
+                return "tile-revealed";
             }
         }
 
-        public string cssIcon
+        public string CssIcon
         {
             get
             {

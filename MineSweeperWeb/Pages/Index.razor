@@ -35,13 +35,13 @@
     private int totalMines = 10;
     private int remainingMines = 10;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         base.OnInitialized();
         if (firstRender)
         {
             Reset();
-            await InitializeStopwatch();
+            InitializeStopwatch();
         }
     }
 

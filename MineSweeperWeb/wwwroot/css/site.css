@@ -26,3 +26,22 @@
     user-select: none;
     -o-user-select: none;
 }
+
+.tile {
+    border: solid 1px;
+    min-height: 30px;
+    min-width: 30px
+}
+
+.tile-hidden {
+    background-color: #B8B8B8;
+    transition: 0.3s;
+}
+    .tile-hidden:hover {
+        background-color: #C8C8C8;
+    }
+
+.tile-revealed {
+    background-color: Gainsboro;
+    transition: 0.3s;
+}
