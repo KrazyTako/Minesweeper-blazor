@@ -30,7 +30,25 @@
 .tile {
     border: solid 1px;
     min-height: 30px;
-    min-width: 30px
+    min-width: 30px;
+}
+
+.tile::after {
+    content:"";
+    float: left;
+    display: block;
+    padding-top: 100%;
+}
+
+.tile-content {
+    position:absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tile-hidden {
@@ -45,3 +63,45 @@
     background-color: Gainsboro;
     transition: 0.3s;
 }
+
+.minesweeper {
+    background-color: #f9f9f9;
+}
+
+@media (min-width: 768px) {
+    .minesweeper-12 {
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+}
+
+@media (min-width: 992px) {
+    .minesweeper-12 {
+        padding-left: 150px;
+        padding-right: 150px;
+    }
+    .minesweeper-16 {
+        padding-left: 100px;
+        padding-right: 100px;
+    }
+    .minesweeper-20 {
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .minesweeper-12 {
+        padding-left: 200px;
+        padding-right: 200px;
+    }
+    .minesweeper-16 {
+        padding-left: 175px;
+        padding-right: 175px;
+    }
+    .minesweeper-20 {
+        padding-left: 150px;
+        padding-right: 150px;
+    }
+}
+

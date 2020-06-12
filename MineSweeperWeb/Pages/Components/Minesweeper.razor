@@ -2,19 +2,21 @@
 @using System.Timers
 @inject VibrationService vibrationService
 
-<div oncontextmenu="return false" class="disable-text-highlight overflow-auto">
+<div oncontextmenu="return false" class="@sweeperClassMines disable-text-highlight overflow-auto minesweeper">
     @for (int i = 0; i < tiles?.Length; i++)
     {
         int row = i;
-        <div class="row no-gutters flex-nowrap text-center">
+        <div class="row no-gutters flex-nowrap">
             @for (int j = 0; j < tiles[i].Length; j++)
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col tile @tile.CssClass" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
-                    <span class="@tile.CssIcon">
-                        @(tile.IsRevealed && string.IsNullOrEmpty(tile.CssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
-                    </span>
+                <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
+                    <div class="tile-content @tile.CssClass ">
+                        <span class="@tile.CssIcon">
+                            @(tile.IsRevealed && string.IsNullOrEmpty(tile.CssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
+                        </span>
+                    </div>
                 </div>
             }
         </div>
@@ -47,6 +49,7 @@
     private Random generator = new Random();
     private Stopwatch longPressWatch = new Stopwatch();
     private Timer timer = new Timer(200);
+    private string sweeperClassMines = "minesweeper-12";
 
     protected override void OnInitialized()
     {
@@ -56,6 +59,18 @@
 
     public void Reset(int size, int mines)
     {
+        switch (size)
+        {
+            case var n when n <= 12:
+                sweeperClassMines = "minesweeper-12";
+                break;
+            case var k when k <= 16:
+                sweeperClassMines = "minesweeper-16";
+                break;
+            default:
+                sweeperClassMines = "minesweeper-20";
+                break;
+        }
         gridSize = size;
         totalMines = mines;
         gameOver = false;
