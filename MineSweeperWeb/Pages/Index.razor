@@ -9,20 +9,31 @@
     <p>Elapsed time: @elapsedTime</p>
 
     <Minesweeper OnGameWinCallback="OnGameWin" OnGameLoseCallback="OnGameLose" OnFirstActionCallback="OnFirstAction" OnFlagSetCallback="OnFlagSet" @ref="minesweeper"></Minesweeper>
-    <EditForm Model="rows" class="form-inline my-3">
-        <div class="form-group mr-2">
-            <label class="mr-2" for="rows">Rows</label>
-            <InputNumber id="rows" class="form-control" @bind-Value="rows" min="5" max="30"></InputNumber>
+    <EditForm Model="customDifficulty" class="my-3">
+        <div class="form-inline mb-2">
+            <div class="form-group mr-2">
+                <label class="mr-2" for="rows">Rows</label>
+                <InputNumber disabled="@disabled" id="rows" class="form-control" @bind-Value="customDifficulty.Rows" min="5" max="30"></InputNumber>
+            </div>
+            <div class="form-group mr-2">
+                <label class="mr-2" for="columns">Columns</label>
+                <InputNumber disabled="@disabled" id="columns" class="form-control" @bind-Value="customDifficulty.Columns" min="5" max="30"></InputNumber>
+            </div>
+            <div class="form-group mr-2">
+                <label class="mr-2" for="mineCount">Mine Count</label>
+                <InputNumber disabled="@disabled" id="mineCount" class="form-control" @bind-Value="customDifficulty.Mines" min="1" max="@(customDifficulty.Rows * customDifficulty.Columns - 1)"></InputNumber>
+            </div>
+            <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
         </div>
-        <div class="form-group mr-2">
-            <label class="mr-2" for="columns">Columns</label>
-            <InputNumber id="columns" class="form-control" @bind-Value="columns" min="5" max="30"></InputNumber>
+        <div class="form-row">
+            @foreach (Difficulty difficulty in Difficulty.GetAll())
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="difficultyRadioOptions" id="@difficulty.Name" checked="@(selectedDifficulty == difficulty)" @onchange="@(() => selectedDifficulty = difficulty)" value="@difficulty">
+                    <label class="form-check-label" for="@difficulty.Name">@difficulty.Name</label>
+                </div>
+            }
         </div>
-        <div class="form-group mr-2">
-            <label class="mr-2" for="mineCount">Mine Count</label>
-            <InputNumber id="mineCount" class="form-control" @bind-Value="totalMines" min="1" max="@(rows * columns - 1)"></InputNumber>
-        </div>
-        <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
     <ScoreBoard @ref="scoreBoard"></ScoreBoard>
     <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
@@ -35,10 +46,12 @@
     private Stopwatch stopwatch = new Stopwatch();
     private string message = "Good luck!";
     private string elapsedTime = "0";
-    private int rows = 8;
-    private int columns = 8;
+    private int rows = 9;
+    private int columns = 9;
     private int totalMines = 10;
     private int remainingMines = 10;
+    private CustomDifficulty customDifficulty = new CustomDifficulty();
+    private Difficulty selectedDifficulty = Difficulty.BEGINNER;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -73,9 +86,30 @@
         stopwatch.Stop();
         elapsedTime = "0";
         message = "Good luck!";
-        remainingMines = totalMines;
+        SetDifficulty();
         minesweeper.Reset(rows, columns, totalMines);
         StateHasChanged();
+    }
+
+    private void SetDifficulty()
+    {
+        if (selectedDifficulty == Difficulty.CUSTOM)
+        {
+            rows = customDifficulty.Rows;
+            columns = customDifficulty.Columns;
+            totalMines = customDifficulty.Mines;
+        }
+        else
+        {
+            rows = selectedDifficulty.Rows;
+            columns = selectedDifficulty.Columns;
+            totalMines = selectedDifficulty.Mines;
+            // Just to show in the UI inputs what their difficulty has been set to.
+            customDifficulty.Rows = rows;
+            customDifficulty.Columns = columns;
+            customDifficulty.Mines = totalMines;
+        }
+        remainingMines = totalMines;
     }
 
     private async Task OnGameWin()
@@ -104,4 +138,5 @@
     }
 
     private void OnScoreCreated(Score newScore) => scoreBoard.AddScore(newScore);
+    private bool disabled { get => selectedDifficulty != Difficulty.CUSTOM; }
 }
