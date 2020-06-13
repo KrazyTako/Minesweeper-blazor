@@ -9,14 +9,18 @@
     <p>Elapsed time: @elapsedTime</p>
 
     <Minesweeper OnGameWinCallback="OnGameWin" OnGameLoseCallback="OnGameLose" OnFirstActionCallback="OnFirstAction" OnFlagSetCallback="OnFlagSet" @ref="minesweeper"></Minesweeper>
-    <EditForm Model="gridSize" class="form-inline my-3">
+    <EditForm Model="rows" class="form-inline my-3">
         <div class="form-group mr-2">
-            <label class="mr-2" for="gridSize">Grid size</label>
-            <InputNumber id="gridSize" class="form-control" @bind-Value="gridSize" min="5" max="20"></InputNumber>
+            <label class="mr-2" for="rows">Rows</label>
+            <InputNumber id="rows" class="form-control" @bind-Value="rows" min="5" max="30"></InputNumber>
+        </div>
+        <div class="form-group mr-2">
+            <label class="mr-2" for="columns">Columns</label>
+            <InputNumber id="columns" class="form-control" @bind-Value="columns" min="5" max="30"></InputNumber>
         </div>
         <div class="form-group mr-2">
             <label class="mr-2" for="mineCount">Mine Count</label>
-            <InputNumber id="mineCount" class="form-control" @bind-Value="totalMines" min="1" max="@(gridSize * gridSize - 1)"></InputNumber>
+            <InputNumber id="mineCount" class="form-control" @bind-Value="totalMines" min="1" max="@(rows * columns - 1)"></InputNumber>
         </div>
         <button type="button" @onclick="Reset" class="btn btn-outline-primary">Reset</button>
     </EditForm>
@@ -31,7 +35,8 @@
     private Stopwatch stopwatch = new Stopwatch();
     private string message = "Good luck!";
     private string elapsedTime = "0";
-    private int gridSize = 8;
+    private int rows = 8;
+    private int columns = 8;
     private int totalMines = 10;
     private int remainingMines = 10;
 
@@ -69,7 +74,7 @@
         elapsedTime = "0";
         message = "Good luck!";
         remainingMines = totalMines;
-        minesweeper.Reset(gridSize, totalMines);
+        minesweeper.Reset(rows, columns, totalMines);
         StateHasChanged();
     }
 
@@ -77,7 +82,7 @@
     {
         stopwatch.Stop();
         message = "You've won!";
-        await newScoreModal.Show(stopwatch.ElapsedMilliseconds, gridSize, gridSize, totalMines);
+        await newScoreModal.Show(stopwatch.ElapsedMilliseconds, rows, columns, totalMines);
     }
 
     private void OnGameLose()

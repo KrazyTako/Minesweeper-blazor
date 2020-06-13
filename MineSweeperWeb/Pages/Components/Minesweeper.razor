@@ -36,7 +36,8 @@
     [Parameter]
     public EventCallback<bool> OnFirstActionCallback { get; set; }
 
-    private int gridSize = 8;
+    private int _rows = 8;
+    private int _columns = 8;
     private int totalMines = 10;
     private bool gameOver = false;
     private bool firstTouch = true;
@@ -57,9 +58,9 @@
         timer.Elapsed += doVibration;
     }
 
-    public void Reset(int size, int mines)
+    public void Reset(int rows, int columns, int mines)
     {
-        switch (size)
+        switch (columns)
         {
             case var n when n <= 12:
                 sweeperClassMines = "minesweeper-12";
@@ -67,21 +68,25 @@
             case var k when k <= 16:
                 sweeperClassMines = "minesweeper-16";
                 break;
-            default:
+            case var i when i <= 20:
                 sweeperClassMines = "minesweeper-20";
                 break;
+            default:
+                sweeperClassMines = "minesweeper-30";
+                break;
         }
-        gridSize = size;
+        _rows = rows;
+        _columns = columns;
         totalMines = mines;
         gameOver = false;
         firstTouch = true;
         revealedSuccess = 0;
-        revealedToWin = (gridSize * gridSize) - totalMines;
+        revealedToWin = (rows * columns) - totalMines;
 
-        tiles = new TileProperty[gridSize][];
+        tiles = new TileProperty[_rows][];
         for (int i = 0; i < tiles.Length; i++)
         {
-            tiles[i] = new TileProperty[gridSize];
+            tiles[i] = new TileProperty[_columns];
             for (int j = 0; j < tiles[i].Length; j++)
             {
                 tiles[i][j] = new TileProperty();
@@ -93,8 +98,8 @@
         int count = 0;
         while (count < totalMines)
         {
-            int randomRow = generator.Next(0, gridSize);
-            int randomCol = generator.Next(0, gridSize);
+            int randomRow = generator.Next(0, _rows);
+            int randomCol = generator.Next(0, _columns);
             TileProperty tile = tiles[randomRow][randomCol];
 
             if (!tile.IsBomb)
@@ -239,7 +244,7 @@
             {
                 var i = tile.Row + xoff;
                 var j = tile.Col + yoff;
-                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
+                if (i > -1 && i < _rows && j > -1 && j < _columns)
                 {
                     var neighbor = tiles[i][j];
                     if (neighbor.IsBomb)
@@ -261,7 +266,7 @@
             {
                 var i = tile.Row + xoff;
                 var j = tile.Col + yoff;
-                if (i > -1 && i < gridSize && j > -1 && j < gridSize)
+                if (i > -1 && i < _rows && j > -1 && j < _columns)
                 {
                     var neighbor = tiles[i][j];
                     if (neighbor.IsRevealed)
