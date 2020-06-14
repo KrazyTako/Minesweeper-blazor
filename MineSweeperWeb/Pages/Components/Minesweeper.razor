@@ -109,6 +109,20 @@
             }
         }
 
+        bool markedFirstHelper = false;
+        while(!markedFirstHelper)
+        {
+            int randomRow = generator.Next(0, _rows);
+            int randomCol = generator.Next(0, _columns);
+            TileProperty tile = tiles[randomRow][randomCol];
+
+            if (!tile.IsBomb)
+            {
+                markedFirstHelper = true;
+                tile.IsFirstHelper = true;
+            }
+        }
+
         for (int i = 0; i < tiles.Length; i++)
         {
             for (int j = 0; j < tiles[i].Length; j++)
