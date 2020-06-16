@@ -41,8 +41,12 @@
             $(`#${modalId}`).modal('hide')
         }
 
-        function showModal(modalId) {
-            $(`#${modalId}`).modal({ backdrop: 'static' })
+        function showModal(modalId, static) {
+            if (static === true) {
+                $(`#${modalId}`).modal({ backdrop: 'static' })
+            } else {
+                $(`#${modalId}`).modal('show')
+            }
         }
     </script>
 </body>

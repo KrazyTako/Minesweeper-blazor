@@ -67,6 +67,6 @@
         _width = width;
         _height = height;
         _mineCount = mineCount;
-        await jsRuntime.InvokeVoidAsync("showModal", modalId);
+        await jsRuntime.InvokeVoidAsync("showModal", modalId, true);
     }
 }

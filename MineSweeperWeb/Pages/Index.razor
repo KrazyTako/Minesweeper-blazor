@@ -2,42 +2,42 @@
 @using System.Diagnostics
 @inject MineSweeperData.Services.ScoresService scoreService;
 
-    <div class="container">
-        <h1>@message</h1>
+<div class="container">
+    <h1>@message</h1>
 
-        <p>Remaining mines: @remainingMines</p>
-        <p>Elapsed time: @elapsedTime</p>
+    <p>Remaining mines: @remainingMines</p>
+    <p>Elapsed time: @elapsedTime</p>
 
-        <Minesweeper OnGameWinCallback="OnGameWin" OnGameLoseCallback="OnGameLose" OnFirstActionCallback="OnFirstAction" OnFlagSetCallback="OnFlagSet" @ref="minesweeper"></Minesweeper>
-        <EditForm Model="customDifficulty" class="my-3">
-            <div class="form-row">
-                <div class="form-group col">
-                    <label for="rows">Rows</label>
-                    <InputNumber disabled="@disabled" id="rows" class="form-control" @bind-Value="customDifficulty.Rows" min="5" max="30"></InputNumber>
-                </div>
-                <div class="form-group col">
-                    <label for="columns">Columns</label>
-                    <InputNumber disabled="@disabled" id="columns" class="form-control" @bind-Value="customDifficulty.Columns" min="5" max="30"></InputNumber>
-                </div>
-                <div class="form-group col">
-                    <label for="mineCount">Mines</label>
-                    <InputNumber disabled="@disabled" id="mineCount" class="form-control" @bind-Value="customDifficulty.Mines" min="1" max="@(customDifficulty.Rows * customDifficulty.Columns - 1)"></InputNumber>
-                </div>
-                <button type="button" @onclick="Reset" class="btn btn-outline-primary align-items-">Reset</button>
+    <Minesweeper OnGameWinCallback="OnGameWin" OnGameLoseCallback="OnGameLose" OnFirstActionCallback="OnFirstAction" OnFlagSetCallback="OnFlagSet" @ref="minesweeper"></Minesweeper>
+    <EditForm Model="customDifficulty" class="my-3">
+        <div class="form-row">
+            <div class="form-group col">
+                <label for="rows">Rows</label>
+                <InputNumber disabled="@disabled" id="rows" class="form-control" @bind-Value="customDifficulty.Rows" min="5" max="30"></InputNumber>
             </div>
-            <div class="form-row">
-                @foreach (Difficulty difficulty in Difficulty.GetAll())
-                {
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="difficultyRadioOptions" id="@difficulty.Name" checked="@(selectedDifficulty == difficulty)" @onchange="@(() => selectedDifficulty = difficulty)" value="@difficulty">
-                        <label class="form-check-label" for="@difficulty.Name">@difficulty.Name</label>
-                    </div>
-                }
+            <div class="form-group col">
+                <label for="columns">Columns</label>
+                <InputNumber disabled="@disabled" id="columns" class="form-control" @bind-Value="customDifficulty.Columns" min="5" max="30"></InputNumber>
             </div>
-        </EditForm>
-        <ScoreBoard @ref="scoreBoard"></ScoreBoard>
-        <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
-    </div>
+            <div class="form-group col">
+                <label for="mineCount">Mines</label>
+                <InputNumber disabled="@disabled" id="mineCount" class="form-control" @bind-Value="customDifficulty.Mines" min="1" max="@(customDifficulty.Rows * customDifficulty.Columns - 1)"></InputNumber>
+            </div>
+            <button type="button" @onclick="Reset" class="btn btn-outline-primary align-items-">Reset</button>
+        </div>
+        <div class="form-row">
+            @foreach (Difficulty difficulty in Difficulty.GetAll())
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="difficultyRadioOptions" id="@difficulty.Name" checked="@(selectedDifficulty == difficulty)" @onchange="@(() => selectedDifficulty = difficulty)" value="@difficulty">
+                    <label class="form-check-label" for="@difficulty.Name">@difficulty.Name</label>
+                </div>
+            }
+        </div>
+    </EditForm>
+    <ScoreBoard @ref="scoreBoard"></ScoreBoard>
+    <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
+</div>
 
 @code {
     private Minesweeper minesweeper;

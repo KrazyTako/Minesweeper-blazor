@@ -1,0 +1,37 @@
+﻿@inject IJSRuntime jsRuntime
+
+<div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-labelledby="contactInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactInfoModalLabel">PlayMinesweeper.online</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Thank you for playing! For any questions or feedback please feel free to contact me at
+                    <a href="mailto: playminesweeper.online@gmail.com">playminesweeper.online@gmail.com</a>.
+                </p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="https://www.linkedin.com/in/david-rodriguez-a46b6a178/" target="_blank">LinkedIn</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="https://github.com/krazytako" target="_blank">Github</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string modalId = "contactInfoModal";
+
+    public async Task Show()
+    {
+        await jsRuntime.InvokeVoidAsync("showModal", modalId, false);
+    }
+}

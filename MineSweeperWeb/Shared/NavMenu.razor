@@ -1,8 +1,31 @@
-﻿<nav class="navbar navbar-light bg-white border-bottom shadow-sm">
-    <div class="container">
-        <a class="navbar-brand">Minesweeper</a>
-    </div>
-</nav>
+﻿<div class="sticky-top">
+    <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="">Play Minesweeper</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                <ul class="navbar-nav ml-auto">
+                    @*<li class="nav-item">
+                        <a class="nav-link" href="">How to play</a>
+                    </li>*@
+                    <li class="nav-item">
+                        <a class="nav-link" style="cursor:pointer" @onclick="ShowContactModal">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+<ContactInfoModal @ref="contactInfoModal"></ContactInfoModal>
 
 @code {
+    ContactInfoModal contactInfoModal;
+
+    private async Task ShowContactModal()
+    {
+        await contactInfoModal.Show();
+    }
 }
