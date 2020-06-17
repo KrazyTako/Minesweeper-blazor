@@ -1,0 +1,49 @@
+﻿@page "/how-to-play"
+
+<div class="container">
+    <h1>How to Play</h1>
+
+    <h3>1 on a corner? It's a mine!</h3>
+    <p>
+        Minesweeper is a game of logic, and a hint of chance. Here are the basics:
+    </p>
+    <ul>
+        <li>
+            <p>First, click a square to reveal it. If it's a mine, you lose.</p> 
+            <img src="assets/revealed-mine.png" width="200" height="200" />
+        </li>
+        <li>
+            <p>If you instead get a number, then that is the exact number of mines that are directly touching that square, corners included.</p>
+            <img src="assets/revealed-number.png" width="200" height="200" />
+            <p>
+                In the image above there is a single revealed block with a number 1 on it. There are 8 unrevealed blocks touching that revealed block. 
+                So exactly one of those unrevealed blocks contains a mine. Sometimes you just have to guess in order to get the ball rolling. In this case, we would have 
+                a 1/8 chance of revealing a surrounding block which contains a mine.
+            </p>
+        </li>
+        <li>
+            <p>
+                However to win the game, you are better off not guessing. There are many situations where the numbers will tell you exactly which blocks have a mine.
+                Consider the following example:
+            </p>
+            <img src="assets/revealed-1-corner.png" width="200" height="341" />
+            <p>
+                The highlighted revealed blocks with 1's on them are touching exactly 1 other block. Since the revealed block tells us that only 1 other block touching it contains a mine,
+                that means that a mine must be on the block that it is touching, since that is the only one touching it.
+            </p>
+            <p>
+                Keep an eye out for similar variations of this "1 mine corner case". The more you play the more you'll catch on and more easily recognize this pattern!
+            </p>
+        </li>
+        <li>
+            <p>
+                If you are certain that a block contains a mine, right click (or tap and hold on mobile) on it to place a flag. This is useful for organization when  
+            </p>
+            <img src="assets/definitely-a-mine.png" width="200" height="200" />
+        </li>
+    </ul>
+</div>
+
+@code {
+
+}
