@@ -36,8 +36,8 @@
     [Parameter]
     public EventCallback<bool> OnFirstActionCallback { get; set; }
 
-    private int _rows = 8;
-    private int _columns = 8;
+    private int _rows = 9;
+    private int _columns = 9;
     private int totalMines = 10;
     private bool gameOver = false;
     private bool firstTouch = true;
@@ -56,6 +56,7 @@
     {
         base.OnInitialized();
         timer.Elapsed += doVibration;
+        Reset(_rows, _columns, totalMines);
     }
 
     public void Reset(int rows, int columns, int mines)
