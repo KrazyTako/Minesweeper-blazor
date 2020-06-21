@@ -6,6 +6,9 @@ namespace MineSweeperData.Models
     public class Score
     {
         public int Id { get; set; }
+
+        public ApplicationUser ApplicationUser { get; set; }
+
         [Required]
         public TimeSpan Time { get; set; }
         

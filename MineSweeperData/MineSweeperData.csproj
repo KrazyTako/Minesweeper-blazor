@@ -5,6 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200621070524_add-custom-identity.cs" />
+    <Compile Remove="Migrations\20200621070524_add-custom-identity.Designer.cs" />
+    <Compile Remove="Migrations\20200621073730_add-app-user-to-score.cs" />
+    <Compile Remove="Migrations\20200621073730_add-app-user-to-score.Designer.cs" />
+    <Compile Remove="Migrations\20200621074054_add-app-user-to-score.cs" />
+    <Compile Remove="Migrations\20200621074054_add-app-user-to-score.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.5" />

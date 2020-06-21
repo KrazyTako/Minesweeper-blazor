@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MineSweeperData;
+using MineSweeperData.Models;
 using MineSweeperData.Services;
 
 namespace MineSweeperWeb
@@ -29,7 +30,7 @@ namespace MineSweeperWeb
         {
             services.AddDbContext<MinesweeperDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options => options.User.RequireUniqueEmail = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => options.User.RequireUniqueEmail = true)
                 .AddEntityFrameworkStores<MinesweeperDbContext>();
 
             services.AddRazorPages();
