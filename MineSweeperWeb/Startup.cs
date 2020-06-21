@@ -36,7 +36,7 @@ namespace MineSweeperWeb
         {
             services.AddDbContext<MinesweeperDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<IdentityUser>(options => options.User.RequireUniqueEmail = true)
                 .AddEntityFrameworkStores<MinesweeperDbContext>();
 
             services.AddRazorPages();
