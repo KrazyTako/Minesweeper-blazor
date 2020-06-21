@@ -83,6 +83,7 @@ namespace MineSweeperData.Services
                 var context = scope.ServiceProvider.GetService<MinesweeperDbContext>();
                 return await context.Scores
                             .Where(score => score.Date > start && score.Date < end)
+                            .Include(score => score.ApplicationUser)
                             .ToListAsync();
             }
         }

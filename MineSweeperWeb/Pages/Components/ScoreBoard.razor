@@ -37,7 +37,7 @@
                     int rank = i + 1;
                     <tr>
                         <td>@rank</td>
-                        <td>@scores[i].Name</td>
+                        <td>@(scores[i].ApplicationUser?.UserName ?? scores[i].Name)</td>
                         <td>@scores[i].Time.Minutes:@scores[i].Time.Seconds</td>
                         <td>@ComputeScore(scores[i]).ToString()</td>
                         <td>@scores[i].Date.ToShortDateString()</td>
