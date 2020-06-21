@@ -14,6 +14,23 @@
                     <li class="nav-item">
                         <a class="nav-link" style="cursor:pointer" @onclick="ShowContactModal">Contact</a>
                     </li>
+                    <AuthorizeView>
+                        <Authorized>
+                            <li class="nav-item">
+                                <form method="post" action="Identity/Account/LogOut">
+                                    <button type="submit" class="nav-link btn btn-link">Log out</button>
+                                </form>
+                            </li>
+                        </Authorized>
+                        <NotAuthorized>
+                            <li class="nav-item">
+                                <a class="nav-link" href="identity/account/register">Register<span class="sr-only">(current)</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="identity/account/login">Login</a>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
                 </ul>
             </div>
         </div>
