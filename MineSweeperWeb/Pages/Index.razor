@@ -44,6 +44,13 @@
             }
         </div>
     </EditForm>
+    <AuthorizeView>
+        <Authorized>
+            <CascadingValue Value="userId">
+                <AppUsersScores @ref="appUserScores"></AppUsersScores>
+            </CascadingValue>
+        </Authorized>
+    </AuthorizeView>
     <ScoreBoard @ref="scoreBoard"></ScoreBoard>
     <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
 </div>
@@ -51,9 +58,11 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private string userId;
 
     private Minesweeper minesweeper;
     private ScoreBoard scoreBoard;
+    private AppUsersScores appUserScores;
     private NewScoreModal newScoreModal;
     private Stopwatch stopwatch = new Stopwatch();
     private string message = "Good luck!";
@@ -65,13 +74,19 @@
     private CustomDifficulty customDifficulty = new CustomDifficulty();
     private Difficulty selectedDifficulty = Difficulty.BEGINNER;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
         InitializeStopwatch();
         customDifficulty.Rows = 9;
         customDifficulty.Columns = 9;
         customDifficulty.Mines = 10;
+        var authState = await authenticationStateTask;
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            var user = await UserManager.FindByNameAsync(authState.User.Identity.Name);
+            userId = user.Id;
+        }
     }
 
     private async Task InitializeStopwatch()
@@ -130,9 +145,9 @@
         var authState = await authenticationStateTask;
         if (authState.User.Identity.IsAuthenticated)
         {
-            var user = await UserManager.FindByNameAsync(authState.User.Identity.Name);
-            await scoreService.CreateUserScore(user.Id, rows, columns, totalMines, stopwatch.ElapsedMilliseconds);
-        } 
+            var newScore = await scoreService.CreateUserScore(userId, rows, columns, totalMines, stopwatch.ElapsedMilliseconds);
+            appUserScores.AddNewScore(newScore);
+        }
         else
         {
             await newScoreModal.Show(stopwatch.ElapsedMilliseconds, rows, columns, totalMines);
