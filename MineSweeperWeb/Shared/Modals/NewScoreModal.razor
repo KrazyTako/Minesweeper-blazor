@@ -54,7 +54,7 @@
     {
         spinnerCssState = "spinner-border";
         sendBtnDisabled = true;
-        Score newScore = await scoreService.CreateNewScore(createScore.Name, createScore.Message, _width, _height, _mineCount, _time);
+        Score newScore = await scoreService.CreateAnonymousScore(createScore.Name, createScore.Message, _width, _height, _mineCount, _time);
         spinnerCssState = null;
         sendBtnDisabled = false;
         await jsRuntime.InvokeVoidAsync("hideModal", modalId);

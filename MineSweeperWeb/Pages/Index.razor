@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Diagnostics
+@using Microsoft.AspNetCore.Identity
 @inject MineSweeperData.Services.ScoresService scoreService
+@inject UserManager<ApplicationUser> UserManager
 
 <div class="container">
     <h1>
@@ -47,6 +49,9 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     private Minesweeper minesweeper;
     private ScoreBoard scoreBoard;
     private NewScoreModal newScoreModal;
@@ -122,7 +127,16 @@
     {
         stopwatch.Stop();
         message = "You've won!";
-        await newScoreModal.Show(stopwatch.ElapsedMilliseconds, rows, columns, totalMines);
+        var authState = await authenticationStateTask;
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            var user = await UserManager.FindByNameAsync(authState.User.Identity.Name);
+            await scoreService.CreateUserScore(user.Id, rows, columns, totalMines, stopwatch.ElapsedMilliseconds);
+        } 
+        else
+        {
+            await newScoreModal.Show(stopwatch.ElapsedMilliseconds, rows, columns, totalMines);
+        }
     }
 
     private void OnGameLose()
