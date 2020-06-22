@@ -1,0 +1,61 @@
+﻿<nav>
+    <ul class="pagination justify-content-end">
+        <li class="page-item" @onclick="PreviousPage">
+            <a class="page-link">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        @for (int i = 0; i < Math.Ceiling(TotalCount / (double)PageCount); i++)
+        {
+            int temp = i;
+            string cssActive = (temp == currentPage ? "active" : "");
+            <li class="page-item @cssActive" @onclick="() => PageSelected(temp)">
+                <a class="page-link">@(temp + 1)</a>
+            </li>
+        }
+        <li class="page-item" @onclick="NextPage">
+            <a class="page-link">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    [Parameter]
+    public int PageCount { get; set; }
+
+    [Parameter]
+    public int TotalCount { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageChangeCallback { get; set; }
+
+    private int currentPage = 0;
+
+    public async Task NextPage()
+    {
+        if ((currentPage + 1) * PageCount >= TotalCount)
+        {
+            return;
+        }
+        currentPage++;
+        await OnPageChangeCallback.InvokeAsync(currentPage);
+    }
+
+    public async Task PreviousPage()
+    {
+        if ((currentPage - 1) * PageCount < 0)
+        {
+            return;
+        }
+        currentPage--;
+        await OnPageChangeCallback.InvokeAsync(currentPage);
+    }
+
+    public async Task PageSelected(int selectedPage)
+    {
+        await OnPageChangeCallback.InvokeAsync(selectedPage);
+        currentPage = selectedPage;
+    }
+}
