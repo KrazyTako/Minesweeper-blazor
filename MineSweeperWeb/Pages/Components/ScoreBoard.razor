@@ -32,25 +32,29 @@
                 </tr>
             </thead>
             <tbody>
-                @for(int i = 0; i < scores.Count; i++)
+                @for (int i = 0; i < shownScores.Count; i++)
                 {
-                    int rank = i + 1;
+                    int rank = i + 1 + (pageCount * currentPage);
                     <tr>
                         <td>@rank</td>
-                        <td>@(scores[i].ApplicationUser?.UserName ?? scores[i].Name)</td>
-                        <td>@scores[i].Time.Minutes:@scores[i].Time.Seconds</td>
-                        <td>@ComputeScore(scores[i]).ToString()</td>
-                        <td>@scores[i].Date.ToShortDateString()</td>
-                        <td>@scores[i].Message</td>
+                        <td>@(shownScores[i].ApplicationUser?.UserName ?? shownScores[i].Name)</td>
+                        <td>@shownScores[i].Time.Minutes:@shownScores[i].Time.Seconds</td>
+                        <td>@ComputeScore(shownScores[i]).ToString()</td>
+                        <td>@shownScores[i].Date.ToShortDateString()</td>
+                        <td>@shownScores[i].Message</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+    <PaginationNav TotalCount="scores.Count" PageCount="pageCount" OnPageChangeCallback="OnPageChanged"></PaginationNav>
 </div>
 
 @code {
     IList<Score> scores = new List<Score>();
+    IList<Score> shownScores = new List<Score>();
+    int pageCount = 10;
+    int currentPage = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,12 +67,19 @@
         scores = (await scoresService.GetScoresInDateRange(start, end))
                     .OrderByDescending(ComputeScore)
                     .ToList();
+        shownScores = scores.Skip(0 * pageCount).Take(pageCount).ToList();
     }
 
     public void AddScore(Score score)
     {
         scores.Add(score);
         StateHasChanged();
+    }
+
+    public void OnPageChanged(int pageNum)
+    {
+        shownScores = scores.Skip(pageNum * pageCount).Take(pageCount).ToList();
+        currentPage = pageNum;
     }
 
     private int ComputeScore(Score score)
