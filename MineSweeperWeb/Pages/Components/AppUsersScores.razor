@@ -16,7 +16,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var score in scores)
+                @foreach (var score in shownScores)
                 {
                     <tr>
                         <td>@score.Time.Minutes:@score.Time.Seconds</td>
@@ -24,12 +24,34 @@
                         <td>@score.Width</td>
                         <td>@score.Height</td>
                         <td>@score.MineCount</td>
-                        <td>@score.Date.ToShortDateString()</td>
+                        <td>@score.Date.ToString()</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+    <nav>
+        <ul class="pagination justify-content-end">
+            <li class="page-item" @onclick="PreviousPage">
+                <a class="page-link">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (int i = 0; i < Math.Ceiling(scores.Count / (double)pageCount); i++)
+            {
+                int temp = i;
+                string cssActive = (temp == pageNum ? "active" : ""); 
+                <li class="page-item @cssActive" @onclick="() => PageSelected(temp)">
+                    <a class="page-link">@(temp + 1)</a>
+                </li>
+            }
+            <li class="page-item" @onclick="NextPage">
+                <a class="page-link">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 @code {
@@ -37,12 +59,16 @@
     private string userId { get; set; }
 
     IList<Score> scores = new List<Score>();
+    IEnumerable<Score> shownScores = new List<Score>();
+    int pageNum = 0;
+    int pageCount = 10;
 
     protected override async Task OnParametersSetAsync()
     {
         if (!string.IsNullOrEmpty(userId))
         {
-            scores = (await scoreService.GetScoresByUserId(userId)).ToList();
+            scores = (await scoreService.GetScoresByUserId(userId)).OrderByDescending(score => score.Date).ToList();
+            shownScores = scores.Skip(pageNum * pageCount).Take(pageCount);
         }
     }
 
@@ -55,6 +81,34 @@
     public void AddNewScore(Score score)
     {
         scores.Add(score);
+        scores.Insert(0, score);
+        shownScores = scores.Skip(pageNum * pageCount).Take(pageCount);
         StateHasChanged();
+    }
+
+    public void NextPage()
+    {
+        if ((pageNum + 1) * pageCount > scores.Count)
+        {
+            return;
+        }
+        pageNum++;
+        shownScores = scores.Skip(pageNum * pageCount).Take(pageCount);
+    }
+
+    public void PreviousPage()
+    {
+        if ((pageNum - 1) * pageCount < 0)
+        {
+            return;
+        }
+        pageNum--;
+        shownScores = scores.Skip(pageNum * pageCount).Take(pageCount);
+    }
+
+    public void PageSelected(int pageNum)
+    {
+        shownScores = scores.Skip(pageNum * pageCount).Take(pageCount);
+        this.pageNum = pageNum;
     }
 }

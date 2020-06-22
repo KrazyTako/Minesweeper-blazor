@@ -6,13 +6,15 @@
 
 <div class="container">
     <h1>
-        @message
         <AuthorizeView>
             <Authorized>
                 Hello, @context.User.Identity.Name!
             </Authorized>
         </AuthorizeView>
     </h1>
+    <h2>
+        @message
+    </h2>
 
     <p>Remaining mines: @remainingMines</p>
     <p>Elapsed time: @elapsedTime</p>
