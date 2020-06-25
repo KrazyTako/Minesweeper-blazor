@@ -1,0 +1,99 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Configuration
+@inject MineSweeperData.Services.ScoresService scoreService
+@inject IConfiguration configuration;
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<h3>Chat Hub</h3>
+<div class="mb-3" style="height:300px; overflow:auto; display:flex; flex-direction: column-reverse">
+    @foreach (var message in messages)
+    {
+        <p>
+            @message
+        </p>
+    }
+</div>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text">
+            <span class="oi oi-pencil"></span>
+        </span>
+    </div>
+    <input type="text" @onkeyup="OnKeyup" class="form-control" @bind-value="inputText" placeholder="Say hello!" disabled="@(string.IsNullOrWhiteSpace(SessionCookie))"/>
+    <div class="input-group-append">
+        <button @onclick="SendMessage" class="btn btn-outline-secondary" type="button">Send</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [CascadingParameter]
+    private string SessionCookie { get; set; }
+
+    private CustomDifficulty customDifficulty = new CustomDifficulty();
+
+    private HubConnection hubConnection;
+    LinkedList<string> messages = new LinkedList<string>();
+
+    private string inputText;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            var cookie = new System.Net.Cookie(".AspNetCore.Identity.Application", SessionCookie, "/", configuration["Domain"]);
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(NavigationManager.ToAbsoluteUri("/signalRHub"), options =>
+                {
+                    options.Cookies.Add(cookie);
+                })
+                .Build();
+
+            hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
+            await hubConnection.StartAsync();
+        }
+    }
+
+    public Task ReceiveMessage(string name, string message)
+    {
+        messages.AddFirst($"{name} : {message}");
+        if (messages.Count > 100)
+        {
+            messages.RemoveLast();
+        }
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public async Task SendMessage()
+    {
+        var stored = inputText;
+        inputText = string.Empty;
+        var authState = await authenticationStateTask;
+        if (!string.IsNullOrWhiteSpace(stored) && authState.User.Identity.IsAuthenticated)
+        {
+            await hubConnection.InvokeAsync("SendMessage", stored);
+        }
+    }
+
+    public Task OnKeyup(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            return SendMessage();
+        }
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        if(hubConnection != null)
+        {
+            hubConnection.DisposeAsync();
+        }
+    }
+}

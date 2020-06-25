@@ -1,5 +1,6 @@
 ﻿@page "/"
 @namespace MineSweeperWeb.Pages
+@model _Host
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = null;
@@ -22,7 +23,7 @@
     <h1 style="display:none">Play Minesweeper Online</h1>
     <h2 style="display:none">A mobile friendly and modern way to play, learn, and compete in Minesweeper.</h2>
     <app>
-        <component type="typeof(App)" render-mode="ServerPrerendered" />
+        <component type="typeof(App)" render-mode="ServerPrerendered" param-SessionCookie="@Model.SessionCookie"/>
     </app>
 
     <div id="blazor-error-ui">

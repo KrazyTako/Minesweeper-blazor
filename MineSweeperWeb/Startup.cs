@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using MineSweeperData;
 using MineSweeperData.Models;
 using MineSweeperData.Services;
+using MineSweeperWeb.SignalR;
 
 namespace MineSweeperWeb
 {
@@ -34,6 +34,7 @@ namespace MineSweeperWeb
                 .AddEntityFrameworkStores<MinesweeperDbContext>();
 
             services.AddRazorPages();
+            services.AddSignalR();
             services.AddServerSideBlazor();
             services.AddVibration();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
@@ -74,6 +75,7 @@ namespace MineSweeperWeb
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/signalRHub");
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

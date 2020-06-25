@@ -46,12 +46,13 @@
             }
         </div>
     </EditForm>
+    <ChatArea></ChatArea>
     <AuthorizeView>
         <Authorized>
             <CascadingValue Value="userId">
-                <AppUsersScores @ref="appUserScores"></AppUsersScores>
-            </CascadingValue>
-        </Authorized>
+                    <AppUsersScores @ref="appUserScores"></AppUsersScores>
+                </CascadingValue>
+            </Authorized>
     </AuthorizeView>
     <ScoreBoard @ref="scoreBoard"></ScoreBoard>
     <NewScoreModal @ref="newScoreModal" OnScoreCreatedCallback="OnScoreCreated"></NewScoreModal>
