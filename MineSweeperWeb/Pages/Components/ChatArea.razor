@@ -3,16 +3,19 @@
 @inject MineSweeperData.Services.ScoresService scoreService
 @inject IConfiguration configuration;
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 @implements IDisposable
 
 <h3>Chat Hub</h3>
-<div class="mb-3" style="height:300px; overflow:auto; display:flex; flex-direction: column-reverse">
-    @foreach (var message in messages)
-    {
-        <p>
-            @message
-        </p>
-    }
+<div id="chat" class="mb-3" style="height: 300px; overflow-y: scroll">
+    <div style="display:flex; flex-direction: column-reverse;">
+        @foreach (var message in messages)
+        {
+            <p>
+                @message
+            </p>
+        }
+    </div>
 </div>
 <div class="input-group mb-3">
     <div class="input-group-prepend">
@@ -20,7 +23,7 @@
             <span class="oi oi-pencil"></span>
         </span>
     </div>
-    <input type="text" @onkeyup="OnKeyup" class="form-control" @bind-value="inputText" placeholder="Say hello!" disabled="@(string.IsNullOrWhiteSpace(SessionCookie))"/>
+    <input type="text" @onkeyup="OnKeyup" class="form-control" @bind-value="inputText" placeholder="Say hello!" disabled="@(string.IsNullOrWhiteSpace(SessionCookie))" />
     <div class="input-group-append">
         <button @onclick="SendMessage" class="btn btn-outline-secondary" type="button">Send</button>
     </div>
@@ -55,6 +58,7 @@
 
             hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
             await hubConnection.StartAsync();
+            await jsRuntime.InvokeVoidAsync("scrollToBottom", "chat");
         }
     }
 
@@ -91,7 +95,7 @@
 
     public void Dispose()
     {
-        if(hubConnection != null)
+        if (hubConnection != null)
         {
             hubConnection.DisposeAsync();
         }
