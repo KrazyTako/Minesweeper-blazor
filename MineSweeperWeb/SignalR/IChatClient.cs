@@ -1,11 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using MineSweeperData.Models;
+using MineSweeperData.ServiceModels;
+using System.Threading.Tasks;
 
 namespace MineSweeperWeb.SignalR
 {
     public interface IChatClient
     {
-        Task ReceiveMessage(string name, string message);
+        Task ReceiveSystemMessage(string message);
 
-        Task SendMessage(string userId, string message);
+        Task ReceiveUserMessage(ChatHubMessageDto message);
     }
 }

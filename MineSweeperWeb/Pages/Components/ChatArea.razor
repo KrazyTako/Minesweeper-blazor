@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Configuration
-@inject MineSweeperData.Services.ScoresService scoreService
-@inject IConfiguration configuration;
+@inject MineSweeperData.Services.ChatHubMessagesService chatHubMessagesService
+@inject IConfiguration configuration
 @inject NavigationManager NavigationManager
 @inject IJSRuntime jsRuntime
 @implements IDisposable
@@ -48,6 +48,9 @@
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
+            var chatHubMessages = await chatHubMessagesService.GetAll();
+            messages = new LinkedList<string>(chatHubMessages.Reverse().Select(FormatUserMessage));
+
             var cookie = new System.Net.Cookie(".AspNetCore.Identity.Application", SessionCookie, "/", configuration["Domain"]);
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/signalRHub"), options =>
@@ -56,15 +59,27 @@
                 })
                 .Build();
 
-            hubConnection.On<string, string>("ReceiveMessage", ReceiveMessage);
+            hubConnection.On<string>("ReceiveSystemMessage", ReceiveSystemMessage);
+            hubConnection.On<ChatHubMessageDto>("ReceiveUserMessage", ReceiveUserMessage);
             await hubConnection.StartAsync();
             await jsRuntime.InvokeVoidAsync("scrollToBottom", "chat");
         }
     }
 
-    public Task ReceiveMessage(string name, string message)
+    public Task ReceiveSystemMessage(string message)
     {
-        messages.AddFirst($"{name} : {message}");
+        messages.AddFirst(message);
+        if (messages.Count > 100)
+        {
+            messages.RemoveLast();
+        }
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public Task ReceiveUserMessage(ChatHubMessageDto message)
+    {
+        messages.AddFirst(FormatUserMessage(message));
         if (messages.Count > 100)
         {
             messages.RemoveLast();
@@ -84,7 +99,15 @@
         }
     }
 
-    public Task OnKeyup(KeyboardEventArgs e)
+    public void Dispose()
+    {
+        if (hubConnection != null)
+        {
+            hubConnection.DisposeAsync();
+        }
+    }
+
+    private Task OnKeyup(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
@@ -93,11 +116,5 @@
         return Task.CompletedTask;
     }
 
-    public void Dispose()
-    {
-        if (hubConnection != null)
-        {
-            hubConnection.DisposeAsync();
-        }
-    }
+    private string FormatUserMessage(ChatHubMessageDto message) => $"{message.Date.ToLocalTime()} {message.UserName} : {message.Content}";
 }

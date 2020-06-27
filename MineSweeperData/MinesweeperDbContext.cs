@@ -8,6 +8,7 @@ namespace MineSweeperData
     {
         public DbSet<Score> Scores { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<ChatHubMessage> ChatHubMessages { get; set; }
         public MinesweeperDbContext(DbContextOptions<MinesweeperDbContext> options) : base(options) { }
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using CurrieTechnologies.Razor.Vibration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -33,12 +34,14 @@ namespace MineSweeperWeb
             services.AddDefaultIdentity<ApplicationUser>(options => options.User.RequireUniqueEmail = true)
                 .AddEntityFrameworkStores<MinesweeperDbContext>();
 
+            services.AddAutoMapper(typeof(MappingProfile));
             services.AddRazorPages();
             services.AddSignalR();
             services.AddServerSideBlazor();
             services.AddVibration();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddTransient<ScoresService, ScoresService>();
+            services.AddScoped<ChatHubMessagesService, ChatHubMessagesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

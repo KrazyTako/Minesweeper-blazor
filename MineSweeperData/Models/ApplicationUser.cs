@@ -7,6 +7,7 @@ namespace MineSweeperData.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public IList<Score> Scores { get; set; }
+        public ICollection<Score> Scores { get; set; }
+        public ICollection<ChatHubMessage> ChatHubMessages { get; set; }
     }
 }
