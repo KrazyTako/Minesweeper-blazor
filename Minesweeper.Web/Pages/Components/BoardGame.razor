@@ -162,11 +162,13 @@
             lastEventWasTouchMove = false;
             return;
         }
+
         if (firstTouch)
         {
             firstTouch = false;
             await OnFirstActionCallback.InvokeAsync(true);
         }
+
         if (longPressWatch.ElapsedMilliseconds > 200)
         {
             await HandleFlagClick(tile);
@@ -174,6 +176,12 @@
         else
         {
             await HandleRegularClick(tile);
+        }
+
+        if (revealedSuccess == revealedToWin)
+        {
+            gameOver = true;
+            await OnGameWinCallback.InvokeAsync(1);
         }
     }
 
