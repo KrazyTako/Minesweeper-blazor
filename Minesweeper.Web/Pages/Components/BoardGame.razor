@@ -11,7 +11,7 @@
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
+                <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmousedown="OnMouseDown" @onmouseup="(e) => OnClick(e, tile)">
                     <div class="tile-content @tile.CssClass ">
                         <span class="@tile.CssIcon">
                             @(tile.IsRevealed && string.IsNullOrEmpty(tile.CssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
@@ -45,6 +45,8 @@
     private int revealedToWin;
     private bool lastEventWasTouch;
     private bool lastEventWasTouchMove;
+    private bool leftClickDown;
+    private bool rightClickDown;
 
     private TileProperty[][] tiles;
     private Random generator = new Random();
@@ -111,7 +113,7 @@
         }
 
         bool markedFirstHelper = false;
-        while(!markedFirstHelper)
+        while (!markedFirstHelper)
         {
             int randomRow = generator.Next(0, _rows);
             int randomCol = generator.Next(0, _columns);
@@ -177,7 +179,8 @@
 
     private async Task OnClick(MouseEventArgs e, TileProperty tile)
     {
-        if (gameOver || tile.IsRevealed || lastEventWasTouch)
+
+        if (gameOver || lastEventWasTouch)
         {
             lastEventWasTouch = false;
             return;
@@ -189,27 +192,98 @@
             await OnFirstActionCallback.InvokeAsync(true);
         }
 
+        if (leftClickDown && rightClickDown && tile.IsRevealed)
+        {
+            await HandleChord(tile);
+        }
+
         if (e.Button == 2)
         {
+            rightClickDown = false;
             await HandleFlagClick(tile);
         }
-        else
+        else if (e.Button == 0)
         {
+            leftClickDown = false;
             await HandleRegularClick(tile);
         }
+
+        if (revealedSuccess == revealedToWin)
+        {
+            gameOver = true;
+            await OnGameWinCallback.InvokeAsync(1);
+        }
+    }
+
+    private Task HandleChord(TileProperty tile)
+    {
+        // Count surrounding flags
+        int surroundingFlags = 0;
+        for (int xoff = -1; xoff <= 1; xoff++)
+        {
+            for (int yoff = -1; yoff <= 1; yoff++)
+            {
+                var i = tile.Row + xoff;
+                var j = tile.Col + yoff;
+                if (i > -1 && i < _rows && j > -1 && j < _columns)
+                {
+                    var neighbor = tiles[i][j];
+                    if (neighbor.IsFlagged)
+                    {
+                        surroundingFlags++;
+                    }
+                }
+            }
+        }
+
+        // Make sure its equal to the surrounding count, otherwise ignore this action
+        if (surroundingFlags == tile.SurroundingCount)
+        {
+            for (int xoff = -1; xoff <= 1; xoff++)
+            {
+                for (int yoff = -1; yoff <= 1; yoff++)
+                {
+                    var i = tile.Row + xoff;
+                    var j = tile.Col + yoff;
+                    if (i > -1 && i < _rows && j > -1 && j < _columns)
+                    {
+                        var neighbor = tiles[i][j];
+                        if (!neighbor.IsFlagged && !neighbor.IsRevealed)
+                        {
+                            neighbor.IsRevealed = true;
+                            if (neighbor.IsBomb)
+                            {
+                                gameOver = true;
+                                RevealAllBombs();
+                                return OnGameLoseCallback.InvokeAsync(1);
+                            }
+                            if (neighbor.SurroundingCount == 0)
+                            {
+                                RevealAllSurrounding(neighbor);
+                            }
+                            revealedSuccess++;
+                        }
+                    }
+                }
+            }
+        }
+        return Task.CompletedTask;
     }
 
     // Long touch-screen press and right click
     private async Task HandleFlagClick(TileProperty tile)
     {
-        tile.IsFlagged = !tile.IsFlagged;
-        await OnFlagSetCallback.InvokeAsync(tile.IsFlagged);
+        if (!tile.IsRevealed)
+        {
+            tile.IsFlagged = !tile.IsFlagged;
+            await OnFlagSetCallback.InvokeAsync(tile.IsFlagged);
+        }
     }
 
     // Regular touch and left click
     private async Task HandleRegularClick(TileProperty tile)
     {
-        if (tile.IsFlagged)
+        if (tile.IsFlagged || tile.IsRevealed)
         {
             return;
         }
@@ -226,12 +300,18 @@
         {
             RevealAllSurrounding(tile);
         }
-
         revealedSuccess++;
-        if (revealedSuccess == revealedToWin)
+    }
+
+    private void OnMouseDown(MouseEventArgs e)
+    {
+        if (e.Button == 0)
         {
-            gameOver = true;
-            await OnGameWinCallback.InvokeAsync(1);
+            leftClickDown = true;
+        }
+        if (e.Button == 2)
+        {
+            rightClickDown = true;
         }
     }
 
