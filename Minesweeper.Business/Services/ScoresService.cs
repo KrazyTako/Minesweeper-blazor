@@ -35,7 +35,7 @@ namespace Minesweeper.Business.Services
                 Score newScore = new Score();
                 newScore.ApplicationUserId = userId;
                 newScore.Name = "";
-                newScore.Date = DateTime.Now;
+                newScore.Date = DateTime.UtcNow;
                 newScore.Width = width;
                 newScore.Height = height;
                 newScore.MineCount = mineCount;
