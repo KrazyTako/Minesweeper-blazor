@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minesweeper.Web", "Mineswee
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minesweeper.Data", "Minesweeper.Data\Minesweeper.Data.csproj", "{D8186155-A3CC-4035-ABE1-CB368D6175DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minesweeper.Business", "Minesweeper.Business\Minesweeper.Business.csproj", "{1B6D5960-CC23-4B65-A4EC-E475F8BBB87F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minesweeper.Business", "Minesweeper.Business\Minesweeper.Business.csproj", "{1B6D5960-CC23-4B65-A4EC-E475F8BBB87F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
