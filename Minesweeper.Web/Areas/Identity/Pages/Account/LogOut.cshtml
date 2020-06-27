@@ -1,8 +1,8 @@
 ﻿@page
 @using Microsoft.AspNetCore.Identity
-@using Minesweeper.Data.Entities
+@using Minesweeper.Business.Interfaces
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<ApplicationUser> SignInManager
+@inject IAppSignInManager SignInManager
 @functions {
     public async Task<IActionResult> OnPost()
     {

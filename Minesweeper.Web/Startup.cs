@@ -33,6 +33,8 @@ namespace Minesweeper.Web
             services.AddServerSideBlazor();
             services.AddVibration();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            services.AddTransient<IAppSignInManager, AppSignInManager>();
+            services.AddTransient<IAppUserManager, AppUserManager>();
             services.AddTransient<IScoresService, ScoresService>();
             services.AddScoped<IChatHubMessagesService, ChatHubMessagesService>();
         }

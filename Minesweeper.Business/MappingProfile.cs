@@ -8,6 +8,7 @@ namespace Minesweeper.Business
     {
         public MappingProfile()
         {
+            CreateMap<ApplicationUser, ApplicationUserDto>().ReverseMap();
             CreateMap<ChatHubMessage, ChatHubMessageDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.ApplicationUser.UserName));
         }
