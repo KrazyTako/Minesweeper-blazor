@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Minesweeper.Web</AssemblyName>
+    <RootNamespace>Minesweeper.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CurrieTechnologies.Razor.Vibration" Version="0.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Minesweeper.Business\Minesweeper.Business.csproj" />
+    <ProjectReference Include="..\Minesweeper.Data\Minesweeper.Data.csproj" />
+  </ItemGroup>
+
+</Project>
