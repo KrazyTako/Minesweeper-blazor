@@ -155,7 +155,7 @@
     {
         timer.Stop();
         longPressWatch.Stop();
-        if (gameOver || tile.IsRevealed || lastEventWasTouchMove)
+        if (gameOver || lastEventWasTouchMove)
         {
             lastEventWasTouchMove = false;
             return;
@@ -173,7 +173,14 @@
         }
         else
         {
-            await HandleRegularClick(tile);
+            if(tile.IsRevealed)
+            {
+                await HandleChord(tile);
+            }
+            else
+            {
+                await HandleRegularClick(tile);
+            }
         }
 
         if (revealedSuccess == revealedToWin)
