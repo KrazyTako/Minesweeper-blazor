@@ -11,7 +11,7 @@
             {
                 int col = j;
                 TileProperty tile = tiles[i][j];
-                <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmousedown="OnMouseDown" @onmouseup="(e) => OnClick(e, tile)">
+                <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
                     <div class="tile-content @tile.CssClass ">
                         <span class="@tile.CssIcon">
                             @(tile.IsRevealed && string.IsNullOrEmpty(tile.CssIcon) ? (tile.SurroundingCount == 0 ? "" : tile.SurroundingCount.ToString()) : "")
@@ -45,8 +45,6 @@
     private int revealedToWin;
     private bool lastEventWasTouch;
     private bool lastEventWasTouchMove;
-    private bool leftClickDown;
-    private bool rightClickDown;
 
     private TileProperty[][] tiles;
     private Random generator = new Random();
@@ -200,20 +198,20 @@
             await OnFirstActionCallback.InvokeAsync(true);
         }
 
-        if (leftClickDown && rightClickDown && tile.IsRevealed)
-        {
-            await HandleChord(tile);
-        }
-
         if (e.Button == 2)
         {
-            rightClickDown = false;
             await HandleFlagClick(tile);
         }
         else if (e.Button == 0)
         {
-            leftClickDown = false;
-            await HandleRegularClick(tile);
+            if (tile.IsRevealed)
+            {
+                await HandleChord(tile);
+            }
+            else
+            {
+                await HandleRegularClick(tile);
+            }
         }
 
         if (revealedSuccess == revealedToWin)
@@ -309,18 +307,6 @@
             RevealAllSurrounding(tile);
         }
         revealedSuccess++;
-    }
-
-    private void OnMouseDown(MouseEventArgs e)
-    {
-        if (e.Button == 0)
-        {
-            leftClickDown = true;
-        }
-        if (e.Button == 2)
-        {
-            rightClickDown = true;
-        }
     }
 
     private void RevealAllBombs()
