@@ -7,6 +7,8 @@ namespace Minesweeper.Web.SignalR
     public class ChatHub : Hub<IChatClient>
     {
         readonly IChatHubMessagesService _chatHubMessagesService;
+        static int UserCount;
+
         public ChatHub(IChatHubMessagesService chatHubMessagesService)
         {
             _chatHubMessagesService = chatHubMessagesService;
@@ -15,12 +17,18 @@ namespace Minesweeper.Web.SignalR
         {
             string name = Context.User.Identity.Name ?? Context.ConnectionId;
             Clients.All.ReceiveSystemMessage($"system : {name} joined the conversation");
+            UserCount++;
+            if (name.ToLower() == "krazytako")
+            {
+                Clients.Caller.ReceiveSystemMessage($"system : There are {UserCount} players connected");
+            }
             return base.OnConnectedAsync();
         }
         public override Task OnDisconnectedAsync(System.Exception exception)
         {
             string name = Context.User.Identity.Name ?? Context.ConnectionId;
             Clients.All.ReceiveSystemMessage($"system : {name} left the conversation");
+            UserCount--;
             return base.OnDisconnectedAsync(exception);
         }
 
