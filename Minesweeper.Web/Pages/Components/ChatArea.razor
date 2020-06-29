@@ -62,7 +62,7 @@
             hubConnection.On<string>("ReceiveSystemMessage", ReceiveSystemMessage);
             hubConnection.On<ChatHubMessageDto>("ReceiveUserMessage", ReceiveUserMessage);
             await hubConnection.StartAsync();
-            await jsRuntime.InvokeVoidAsync("scrollToBottom", "chat");
+            //await jsRuntime.InvokeVoidAsync("scrollToBottom", "chat");
         }
     }
 
