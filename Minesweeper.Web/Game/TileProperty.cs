@@ -1,4 +1,4 @@
-﻿namespace Minesweeper.Web
+﻿namespace Minesweeper.Web.Game
 {
     public class TileProperty
     {

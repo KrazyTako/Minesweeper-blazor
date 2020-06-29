@@ -3,14 +3,14 @@
 @inject VibrationService vibrationService
 
 <div oncontextmenu="return false" class="@sweeperClassMines disable-text-highlight overflow-auto minesweeper">
-    @for (int i = 0; i < tiles?.Length; i++)
+    @for (int i = 0; i < game.gameBoard.Length; i++)
     {
         int row = i;
         <div class="row no-gutters flex-nowrap">
-            @for (int j = 0; j < tiles[i].Length; j++)
+            @for (int j = 0; j < game.gameBoard[i].Length; j++)
             {
                 int col = j;
-                TileProperty tile = tiles[i][j];
+                TileProperty tile = game.gameBoard[i][j];
                 <div class="col tile" @ontouchstart="TouchStart" @ontouchmove="() => lastEventWasTouchMove = true" @ontouchend="(e) => TouchEnd(e, tile)" @onmouseup="(e) => OnClick(e, tile)">
                     <div class="tile-content @tile.CssClass ">
                         <span class="@tile.CssIcon">
@@ -31,23 +31,16 @@
     public EventCallback OnGameLoseCallback { get; set; }
 
     [Parameter]
-    public EventCallback<bool> OnFlagSetCallback { get; set; }
+    public EventCallback<int> OnFlagSetCallback { get; set; }
 
     [Parameter]
-    public EventCallback<bool> OnFirstActionCallback { get; set; }
+    public EventCallback OnFirstActionCallback { get; set; }
 
-    private int _rows = 9;
-    private int _columns = 9;
-    private int totalMines = 10;
-    private bool gameOver = false;
     private bool firstTouch = true;
-    private int revealedSuccess;
-    private int revealedToWin;
     private bool lastEventWasTouch;
     private bool lastEventWasTouchMove;
 
-    private TileProperty[][] tiles;
-    private Random generator = new Random();
+    private MinesweeperGame game;
     private Stopwatch longPressWatch = new Stopwatch();
     private Timer timer = new Timer(200);
     private string sweeperClassMines = "minesweeper-12";
@@ -56,7 +49,7 @@
     {
         base.OnInitialized();
         timer.Elapsed += doVibration;
-        Reset(_rows, _columns, totalMines);
+        Reset(9, 9, 10);
     }
 
     public void Reset(int rows, int columns, int mines)
@@ -76,70 +69,12 @@
                 sweeperClassMines = "minesweeper-30";
                 break;
         }
-        _rows = rows;
-        _columns = columns;
-        totalMines = mines;
-        gameOver = false;
         firstTouch = true;
-        revealedSuccess = 0;
-        revealedToWin = (rows * columns) - totalMines;
-
-        tiles = new TileProperty[_rows][];
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            tiles[i] = new TileProperty[_columns];
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                tiles[i][j] = new TileProperty();
-                tiles[i][j].Row = i;
-                tiles[i][j].Col = j;
-            }
-        }
-
-        int count = 0;
-        while (count < totalMines)
-        {
-            int randomRow = generator.Next(0, _rows);
-            int randomCol = generator.Next(0, _columns);
-            TileProperty tile = tiles[randomRow][randomCol];
-
-            if (!tile.IsBomb)
-            {
-                tile.IsBomb = true;
-                count++;
-            }
-        }
-
-        bool markedFirstHelper = false;
-        while (!markedFirstHelper)
-        {
-            int randomRow = generator.Next(0, _rows);
-            int randomCol = generator.Next(0, _columns);
-            TileProperty tile = tiles[randomRow][randomCol];
-
-            if (!tile.IsBomb)
-            {
-                markedFirstHelper = true;
-                tile.IsFirstHelper = true;
-            }
-        }
-
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                var tile = tiles[i][j];
-                tile.SurroundingCount = CountNeighboringBombs(tile);
-            }
-        }
+        game = new MinesweeperGame(rows, columns, mines);
+        game.GameWon += (_, __) => OnGameWinCallback.InvokeAsync(null);
+        game.GameLost += (_, __) => OnGameLoseCallback.InvokeAsync(null);
     }
 
-    private void TouchStart(TouchEventArgs e)
-    {
-        longPressWatch.Restart();
-        lastEventWasTouch = true;
-        timer.Start();
-    }
 
     private void doVibration(Object source, System.Timers.ElapsedEventArgs e)
     {
@@ -151,11 +86,18 @@
         vibrationService.VibrateAsync(100);
     }
 
+    private void TouchStart(TouchEventArgs e)
+    {
+        longPressWatch.Restart();
+        lastEventWasTouch = true;
+        timer.Start();
+    }
+
     private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
     {
         timer.Stop();
         longPressWatch.Stop();
-        if (gameOver || lastEventWasTouchMove)
+        if (game.GameOver || lastEventWasTouchMove)
         {
             lastEventWasTouchMove = false;
             return;
@@ -164,36 +106,31 @@
         if (firstTouch)
         {
             firstTouch = false;
-            await OnFirstActionCallback.InvokeAsync(true);
+            await OnFirstActionCallback.InvokeAsync(null);
         }
 
         if (longPressWatch.ElapsedMilliseconds > 200)
         {
-            await HandleFlagClick(tile);
+            game.Flag(tile);
+            await OnFlagSetCallback.InvokeAsync(game.FlagCount);
         }
         else
         {
-            if(tile.IsRevealed)
+            if (tile.IsRevealed)
             {
-                await HandleChord(tile);
+                game.Chord(tile);
             }
             else
             {
-                await HandleRegularClick(tile);
+                game.Reveal(tile);
             }
-        }
-
-        if (revealedSuccess == revealedToWin)
-        {
-            gameOver = true;
-            await OnGameWinCallback.InvokeAsync(1);
         }
     }
 
     private async Task OnClick(MouseEventArgs e, TileProperty tile)
     {
 
-        if (gameOver || lastEventWasTouch)
+        if (game.GameOver || lastEventWasTouch)
         {
             lastEventWasTouch = false;
             return;
@@ -207,175 +144,18 @@
 
         if (e.Button == 2)
         {
-            await HandleFlagClick(tile);
+            game.Flag(tile);
+            await OnFlagSetCallback.InvokeAsync(game.FlagCount);
         }
         else if (e.Button == 0)
         {
             if (tile.IsRevealed)
             {
-                await HandleChord(tile);
+                game.Chord(tile);
             }
             else
             {
-                await HandleRegularClick(tile);
-            }
-        }
-
-        if (revealedSuccess == revealedToWin)
-        {
-            gameOver = true;
-            await OnGameWinCallback.InvokeAsync(1);
-        }
-    }
-
-    private Task HandleChord(TileProperty tile)
-    {
-        // Count surrounding flags
-        int surroundingFlags = 0;
-        for (int xoff = -1; xoff <= 1; xoff++)
-        {
-            for (int yoff = -1; yoff <= 1; yoff++)
-            {
-                var i = tile.Row + xoff;
-                var j = tile.Col + yoff;
-                if (i > -1 && i < _rows && j > -1 && j < _columns)
-                {
-                    var neighbor = tiles[i][j];
-                    if (neighbor.IsFlagged)
-                    {
-                        surroundingFlags++;
-                    }
-                }
-            }
-        }
-
-        // Make sure its equal to the surrounding count, otherwise ignore this action
-        if (surroundingFlags == tile.SurroundingCount)
-        {
-            for (int xoff = -1; xoff <= 1; xoff++)
-            {
-                for (int yoff = -1; yoff <= 1; yoff++)
-                {
-                    var i = tile.Row + xoff;
-                    var j = tile.Col + yoff;
-                    if (i > -1 && i < _rows && j > -1 && j < _columns)
-                    {
-                        var neighbor = tiles[i][j];
-                        if (!neighbor.IsFlagged && !neighbor.IsRevealed)
-                        {
-                            neighbor.IsRevealed = true;
-                            if (neighbor.IsBomb)
-                            {
-                                gameOver = true;
-                                RevealAllBombs();
-                                return OnGameLoseCallback.InvokeAsync(1);
-                            }
-                            if (neighbor.SurroundingCount == 0)
-                            {
-                                RevealAllSurrounding(neighbor);
-                            }
-                            revealedSuccess++;
-                        }
-                    }
-                }
-            }
-        }
-        return Task.CompletedTask;
-    }
-
-    // Long touch-screen press and right click
-    private async Task HandleFlagClick(TileProperty tile)
-    {
-        if (!tile.IsRevealed)
-        {
-            tile.IsFlagged = !tile.IsFlagged;
-            await OnFlagSetCallback.InvokeAsync(tile.IsFlagged);
-        }
-    }
-
-    // Regular touch and left click
-    private async Task HandleRegularClick(TileProperty tile)
-    {
-        if (tile.IsFlagged || tile.IsRevealed)
-        {
-            return;
-        }
-        tile.IsRevealed = true;
-        if (tile.IsBomb)
-        {
-            gameOver = true;
-            RevealAllBombs();
-            await OnGameLoseCallback.InvokeAsync(1);
-            return;
-        }
-
-        if (tile.SurroundingCount == 0)
-        {
-            RevealAllSurrounding(tile);
-        }
-        revealedSuccess++;
-    }
-
-    private void RevealAllBombs()
-    {
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            for (int j = 0; j < tiles[i].Length; j++)
-            {
-                if (tiles[i][j].IsBomb)
-                {
-                    tiles[i][j].IsRevealed = true;
-                }
-            }
-        }
-    }
-
-    private int CountNeighboringBombs(TileProperty tile)
-    {
-        int total = 0;
-
-        for (int xoff = -1; xoff <= 1; xoff++)
-        {
-            for (int yoff = -1; yoff <= 1; yoff++)
-            {
-                var i = tile.Row + xoff;
-                var j = tile.Col + yoff;
-                if (i > -1 && i < _rows && j > -1 && j < _columns)
-                {
-                    var neighbor = tiles[i][j];
-                    if (neighbor.IsBomb)
-                    {
-                        total++;
-                    }
-                }
-            }
-        }
-
-        return total;
-    }
-
-    private void RevealAllSurrounding(TileProperty tile)
-    {
-        for (int xoff = -1; xoff <= 1; xoff++)
-        {
-            for (int yoff = -1; yoff <= 1; yoff++)
-            {
-                var i = tile.Row + xoff;
-                var j = tile.Col + yoff;
-                if (i > -1 && i < _rows && j > -1 && j < _columns)
-                {
-                    var neighbor = tiles[i][j];
-                    if (neighbor.IsRevealed)
-                    {
-                        continue;
-                    }
-                    neighbor.IsRevealed = true;
-                    revealedSuccess++;
-                    if (neighbor.SurroundingCount == 0)
-                    {
-                        RevealAllSurrounding(neighbor);
-                    }
-                }
+                game.Reveal(tile);
             }
         }
     }

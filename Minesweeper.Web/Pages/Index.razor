@@ -163,18 +163,7 @@
         message = "You've lost :(";
     }
 
-    private void OnFlagSet(bool active)
-    {
-        if (active)
-        {
-            remainingMines--;
-        }
-        else
-        {
-            remainingMines++;
-        }
-    }
-
+    private void OnFlagSet(int flagCount) => remainingMines = totalMines - flagCount;
     private void OnScoreCreated(Score newScore) => scoreBoard.AddScore(newScore);
     private bool disabled { get => selectedDifficulty != Difficulty.CUSTOM; }
 }
