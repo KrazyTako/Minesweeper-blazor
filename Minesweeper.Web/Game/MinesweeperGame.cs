@@ -142,7 +142,7 @@ namespace Minesweeper.Web.Game
             // Make sure its equal to the surrounding count, otherwise ignore this action
             if (surroundingFlags == tile.SurroundingCount)
             {
-                IterateNeighbors(tile, neighbor => Reveal(neighbor));
+                IterateNeighbors(tile, Reveal);
             }
         }
 
