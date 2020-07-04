@@ -75,7 +75,6 @@
         game.GameLost += (_, __) => OnGameLoseCallback.InvokeAsync(null);
     }
 
-
     private void doVibration(Object source, System.Timers.ElapsedEventArgs e)
     {
         timer.Stop();
@@ -93,43 +92,17 @@
         timer.Start();
     }
 
-    private async Task TouchEnd(TouchEventArgs e, TileProperty tile)
+    private Task TouchEnd(TouchEventArgs e, TileProperty tile)
     {
         timer.Stop();
         longPressWatch.Stop();
-        if (game.GameOver || lastEventWasTouchMove)
-        {
-            lastEventWasTouchMove = false;
-            return;
-        }
-
-        if (firstTouch)
-        {
-            firstTouch = false;
-            await OnFirstActionCallback.InvokeAsync(null);
-        }
-
-        if (longPressWatch.ElapsedMilliseconds > 200)
-        {
-            game.Flag(tile);
-            await OnFlagSetCallback.InvokeAsync(game.FlagCount);
-        }
-        else
-        {
-            if (tile.IsRevealed)
-            {
-                game.Chord(tile);
-            }
-            else
-            {
-                game.Reveal(tile);
-            }
-        }
+        return DoAction(tile, longPressWatch.ElapsedMilliseconds > 200);
     }
 
-    private async Task OnClick(MouseEventArgs e, TileProperty tile)
-    {
+    private Task OnClick(MouseEventArgs e, TileProperty tile) => DoAction(tile, e.Button == 2);
 
+    private async Task DoAction(TileProperty tile, bool setFlag)
+    {
         if (game.GameOver || lastEventWasTouch)
         {
             lastEventWasTouch = false;
@@ -142,12 +115,12 @@
             await OnFirstActionCallback.InvokeAsync(true);
         }
 
-        if (e.Button == 2)
+        if (setFlag)
         {
             game.Flag(tile);
             await OnFlagSetCallback.InvokeAsync(game.FlagCount);
         }
-        else if (e.Button == 0)
+        else
         {
             if (tile.IsRevealed)
             {
