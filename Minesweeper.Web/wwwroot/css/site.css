@@ -51,17 +51,17 @@
 }
 
 .tile-hidden {
-    background-color: #B8B8B8;
+    background-color: #C7C7C7;
     transition: background-color 0.3s;
-    border: outset 3px;
+    border: outset 3px white;
     border-radius: 5px;
 }
     .tile-hidden:hover {
-        background-color: #C8C8C8;
+        background-color: #e6e6e6;
     }
 
 .tile-revealed {
-    background-color: Gainsboro;
+    background-color: #e6e6e6;
     transition: background-color 0.3s;
     border-radius: 5px;
     border: solid 1px #ccc;
