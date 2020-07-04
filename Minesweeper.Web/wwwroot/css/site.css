@@ -28,7 +28,6 @@
 }
 
 .tile {
-    border: solid 1px;
     min-height: 30px;
     min-width: 30px;
 }
@@ -53,7 +52,9 @@
 
 .tile-hidden {
     background-color: #B8B8B8;
-    transition: 0.3s;
+    transition: background-color 0.3s;
+    border: outset 3px;
+    border-radius: 5px;
 }
     .tile-hidden:hover {
         background-color: #C8C8C8;
@@ -61,7 +62,9 @@
 
 .tile-revealed {
     background-color: Gainsboro;
-    transition: 0.3s;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    border: solid 1px #ccc;
 }
 
 .minesweeper {
