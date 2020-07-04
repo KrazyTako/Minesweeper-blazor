@@ -4,18 +4,13 @@
 <h3>Leader Boards</h3>
 
 <ul class="nav nav-tabs" id="myTab">
-    <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-7), DateTime.Now)" href="#last7">Last 7 Days</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-30), DateTime.Now)" href="#last30">Last 30 Days</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-60), DateTime.Now)" href="#last60">Last 60 Days</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" @onclick="() => UpdateDate(DateTime.Now.AddDays(-90), DateTime.Now)" href="#last90">Last 90 Days</a>
-    </li>
+    @foreach (int days in lastDays)
+    {
+        string active = days == 7 ? "active" : "";
+        <li class="nav-item">
+            <a class="nav-link @active" data-toggle="tab" @onclick="() => UpdateDate(DateTime.UtcNow.AddDays(-1 * days), DateTime.UtcNow)" href="#last@(days)">Last @days Days</a>
+        </li>
+    }
 </ul>
 
 <div class="tab-content mt-2">
@@ -51,6 +46,7 @@
 </div>
 
 @code {
+    IEnumerable<int> lastDays = new [] { 7, 30, 60, 90 };
     IList<Score> scores = new List<Score>();
     IList<Score> shownScores = new List<Score>();
     int pageCount = 10;
@@ -58,7 +54,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await UpdateDate(DateTime.Now.AddDays(-7), DateTime.Now);
+        await UpdateDate(DateTime.UtcNow.AddDays(-7), DateTime.UtcNow);
         await base.OnInitializedAsync();
     }
 
