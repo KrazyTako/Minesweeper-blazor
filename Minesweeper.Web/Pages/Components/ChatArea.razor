@@ -17,17 +17,21 @@
         }
     </div>
 </div>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text">
-            <span class="oi oi-pencil"></span>
-        </span>
+<EditForm EditContext="@editContext" OnValidSubmit="SendMessage">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <span class="oi oi-pencil"></span>
+            </span>
+        </div>
+        <input type="text" class="form-control" @bind-value="model.Message" placeholder="Say hello!" disabled="@IsDisabled" />
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="submit" disabled="@IsDisabled">Send</button>
+        </div>
     </div>
-    <input type="text" @onkeyup="OnKeyup" class="form-control" @bind-value="inputText" placeholder="Say hello!" disabled="@(string.IsNullOrWhiteSpace(SessionCookie))" />
-    <div class="input-group-append">
-        <button @onclick="SendMessage" class="btn btn-outline-secondary" type="button">Send</button>
-    </div>
-</div>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+</EditForm>
 
 @code {
     [CascadingParameter]
@@ -41,7 +45,14 @@
     private HubConnection hubConnection;
     LinkedList<string> messages = new LinkedList<string>();
 
-    private string inputText;
+    private SendChatMessage model = new SendChatMessage();
+
+    private EditContext editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(model);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -90,12 +101,15 @@
 
     public async Task SendMessage()
     {
-        var stored = inputText;
-        inputText = string.Empty;
-        var authState = await authenticationStateTask;
-        if (!string.IsNullOrWhiteSpace(stored) && authState.User.Identity.IsAuthenticated)
+        if (editContext.Validate())
         {
-            await hubConnection.InvokeAsync("SendMessage", stored);
+            var stored = model.Message;
+            model.Message = string.Empty;
+            var authState = await authenticationStateTask;
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                await hubConnection.InvokeAsync("SendMessage", stored);
+            }
         }
     }
 
@@ -107,14 +121,6 @@
         }
     }
 
-    private Task OnKeyup(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            return SendMessage();
-        }
-        return Task.CompletedTask;
-    }
-
     private string FormatUserMessage(ChatHubMessageDto message) => $"{message.Date.ToLocalTime()} {message.UserName} : {message.Content}";
+    private bool IsDisabled => string.IsNullOrWhiteSpace(SessionCookie);
 }
