@@ -96,19 +96,26 @@
     {
         timer.Stop();
         longPressWatch.Stop();
+        if (game.GameOver || lastEventWasTouchMove)
+        {
+            lastEventWasTouchMove = false;
+            return Task.CompletedTask;
+        }
         return DoAction(tile, longPressWatch.ElapsedMilliseconds > 200);
     }
 
-    private Task OnClick(MouseEventArgs e, TileProperty tile) => DoAction(tile, e.Button == 2);
-
-    private async Task DoAction(TileProperty tile, bool setFlag)
+    private Task OnClick(MouseEventArgs e, TileProperty tile)
     {
         if (game.GameOver || lastEventWasTouch)
         {
             lastEventWasTouch = false;
-            return;
+            return Task.CompletedTask;
         }
+        return DoAction(tile, e.Button == 2);
+    }
 
+    private async Task DoAction(TileProperty tile, bool setFlag)
+    {
         if (firstTouch)
         {
             firstTouch = false;
