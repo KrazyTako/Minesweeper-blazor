@@ -8,7 +8,7 @@
 
 <h3>Chat Hub</h3>
 <div id="chat" class="mb-3" style="height: 300px; overflow-y: scroll">
-    <div style="display:flex; flex-direction: column-reverse;">
+    <div style="display:flex; flex-direction: column;">
         @foreach (var message in messages)
         {
             <p>
@@ -73,7 +73,6 @@
             hubConnection.On<string>("ReceiveSystemMessage", ReceiveSystemMessage);
             hubConnection.On<ChatHubMessageDto>("ReceiveUserMessage", ReceiveUserMessage);
             await hubConnection.StartAsync();
-            //await jsRuntime.InvokeVoidAsync("scrollToBottom", "chat");
         }
     }
 
