@@ -1,8 +1,7 @@
 ﻿@page "/"
 @using System.Diagnostics
-@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @inject IScoresService scoreService
-@inject UserManager<ApplicationUser> UserManager
 
 <div class="container">
     <h1>
@@ -87,8 +86,7 @@
         var authState = await authenticationStateTask;
         if (authState.User.Identity.IsAuthenticated)
         {
-            var user = await UserManager.FindByNameAsync(authState.User.Identity.Name);
-            userId = user.Id;
+            userId = authState.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
         }
     }
 
